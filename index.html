@@ -1,0 +1,3095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gold Rush — Olympic Hockey Draft</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --deep:#07111f;--card:#0f1e30;--surf:#12233a;--border:rgba(255,255,255,.08);
+  --gold:#f5c842;--gold2:#c98f00;--silver:#9eb4c8;--teal:#1d8fa0;
+  --green:#3cb371;--red:#d63030;--blue:#1a4f8a;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--deep);color:#fff;font-family:'DM Sans',sans-serif;min-height:100vh;overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;
+  background:repeating-linear-gradient(0deg,transparent,transparent 80px,rgba(255,255,255,.011) 80px,rgba(255,255,255,.011) 81px),
+  repeating-linear-gradient(90deg,transparent,transparent 80px,rgba(255,255,255,.011) 80px,rgba(255,255,255,.011) 81px),
+  radial-gradient(ellipse 120% 70% at 50% 110%,#0c2644 0%,#07111f 100%);pointer-events:none;z-index:0}
+#app{position:relative;z-index:1;max-width:740px;margin:0 auto;padding:14px 13px 80px}
+
+header{text-align:center;padding:22px 0 16px}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:clamp(44px,12vw,70px);letter-spacing:4px;line-height:.9;
+  background:linear-gradient(135deg,#fff 0%,var(--gold) 55%,var(--gold2) 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+  filter:drop-shadow(0 0 24px rgba(245,200,66,.28))}
+.logo-sub{font-size:11px;letter-spacing:5px;text-transform:uppercase;color:var(--silver);margin-top:4px}
+
+.screen{display:none;animation:fadeUp .4s ease both}
+.screen.active{display:block}
+
+/* ---- SHARED ---- */
+.sec-title{font-family:'Bebas Neue',sans-serif;font-size:24px;letter-spacing:2px;color:var(--gold);margin-bottom:4px}
+.sec-desc{color:var(--silver);font-size:13px;margin-bottom:18px;line-height:1.6}
+.card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:16px;margin-bottom:12px}
+.surf{background:var(--surf);border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:12px}
+.lbl{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--silver);margin-bottom:9px}
+
+.btn{padding:12px 18px;border-radius:10px;border:none;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:700;cursor:pointer;transition:all .18s;letter-spacing:.3px}
+.btn-full{width:100%;display:block}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--deep);box-shadow:0 4px 16px rgba(245,200,66,.25)}
+.btn-gold:hover:not(:disabled){transform:translateY(-2px);box-shadow:0 6px 22px rgba(245,200,66,.4)}
+.btn-gold:disabled{opacity:.3;cursor:not-allowed}
+.btn-ghost{background:rgba(255,255,255,.05);color:var(--silver);border:1.5px solid var(--border)}
+.btn-ghost:hover:not(:disabled){background:rgba(255,255,255,.1);color:#fff}
+.btn-ghost:disabled{opacity:.25;cursor:not-allowed}
+.btn-row{display:flex;gap:9px;margin-top:11px}
+.btn-teal{background:rgba(29,143,160,.18);color:var(--teal);border:1.5px solid rgba(29,143,160,.35)}
+.btn-teal:hover{background:rgba(29,143,160,.28)}
+
+/* ---- STRATEGY ---- */
+.strat-grid{display:grid;gap:9px;margin-bottom:16px}
+.sc{background:var(--surf);border:2px solid var(--border);border-radius:13px;padding:16px;cursor:pointer;transition:all .22s;position:relative;overflow:hidden}
+.sc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--ac,var(--gold));transform:scaleX(0);transition:transform .28s;transform-origin:left}
+.sc:hover::before,.sc.sel::before{transform:scaleX(1)}
+.sc:hover{transform:translateY(-2px)}
+.sc.sel{border-color:var(--ac,var(--gold))}
+.sc[data-s=offensive]{--ac:#e05a2b}.sc[data-s=defensive]{--ac:#1a8fe0}.sc[data-s=balanced]{--ac:var(--gold)}
+.sch{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.sch-icon{font-size:22px}.sch-name{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px}
+.sch-desc{font-size:12px;color:var(--silver);line-height:1.5}
+.sch-tags{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap}
+.sch-tag{font-size:11px;color:var(--silver);background:rgba(255,255,255,.05);padding:2px 8px;border-radius:16px}
+.sch-tag span{color:#fff;font-weight:600}
+
+.mbt-row{display:flex;gap:8px}
+.mbt{flex:1;padding:9px;border-radius:8px;border:1.5px solid var(--border);background:transparent;color:var(--silver);font-family:'DM Sans',sans-serif;font-size:13px;font-weight:500;cursor:pointer;transition:all .18s;text-align:center}
+.mbt:hover{border-color:rgba(255,255,255,.28);color:#fff}
+.mbt.on{border-color:var(--gold);color:var(--gold);background:rgba(245,200,66,.07)}
+.mbt small{display:block;font-size:10px;opacity:.65;margin-top:1px}
+
+/* ---- DRAFT ---- */
+.hud{display:flex;justify-content:space-between;align-items:center;background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:10px 13px;margin-bottom:14px}
+.hud-s{text-align:center}
+.hv{font-family:'Bebas Neue',sans-serif;font-size:20px;color:var(--gold);line-height:1}
+.hl{font-size:9px;color:var(--silver);letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.prog-bar{height:3px;background:rgba(255,255,255,.07);border-radius:2px;margin-bottom:14px;overflow:hidden}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--teal),var(--gold));border-radius:2px;transition:width .5s ease}
+
+.roll-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:12px;animation:slideIn .35s cubic-bezier(.34,1.56,.64,1) both}
+.thdr{display:flex;align-items:center;gap:11px;margin-bottom:12px;padding-bottom:11px;border-bottom:1px solid var(--border)}
+.tflag{font-size:32px}.tname{font-family:'Bebas Neue',sans-serif;font-size:18px;letter-spacing:1px;line-height:1}
+.tyear{font-size:11px;color:var(--teal);font-weight:600;letter-spacing:2px;text-transform:uppercase;margin-top:2px}
+.tavg{background:rgba(245,200,66,.09);border:1px solid rgba(245,200,66,.2);border-radius:7px;padding:6px 10px;text-align:center;min-width:50px}
+.tavg-n{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);line-height:1}
+.tavg-l{font-size:9px;color:var(--silver);letter-spacing:1px;text-transform:uppercase}
+
+.plist{display:flex;flex-direction:column;gap:4px}
+.prow{display:flex;align-items:center;gap:8px;padding:8px 9px;border-radius:8px;border:1.5px solid transparent;cursor:pointer;transition:all .15s;background:rgba(255,255,255,.02)}
+.prow:hover{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.12)}
+.prow.hl{border-color:rgba(245,200,66,.4);background:rgba(245,200,66,.04)}
+.prow.dim{opacity:.25;pointer-events:none}
+.prow.drafted{opacity:.2;pointer-events:none}
+.ppos{font-size:9px;font-weight:700;letter-spacing:.5px;min-width:28px;padding:2px 4px;border-radius:4px;text-align:center;border:1px solid}
+.pF{background:rgba(224,90,43,.15);color:#e07a5f;border-color:rgba(224,90,43,.3)}
+.pD{background:rgba(26,79,138,.25);color:#7fa8d8;border-color:rgba(26,79,138,.4)}
+.pG{background:rgba(40,180,100,.15);color:#6fcf97;border-color:rgba(40,180,100,.3)}
+.pname{flex:1;font-size:13px;font-weight:500}
+.prat{font-family:'Bebas Neue',sans-serif;font-size:18px;min-width:28px;text-align:right}
+.prat-h{font-size:14px;color:var(--silver)}
+
+/* slot assignment modal */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn .2s ease}
+.modal{background:var(--card);border:1px solid var(--border);border-top-left-radius:18px;border-top-right-radius:18px;padding:20px 16px 32px;width:100%;max-width:740px;max-height:80vh;overflow-y:auto;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1)}
+.modal-title{font-family:'Bebas Neue',sans-serif;font-size:20px;letter-spacing:2px;color:var(--gold);margin-bottom:4px}
+.modal-sub{font-size:13px;color:var(--silver);margin-bottom:16px}
+.slot-btn{display:flex;align-items:center;gap:10px;width:100%;padding:11px 13px;background:rgba(255,255,255,.03);border:1.5px solid var(--border);border-radius:9px;cursor:pointer;margin-bottom:6px;transition:all .15s;color:#fff;font-family:'DM Sans',sans-serif;font-size:13px;text-align:left}
+.slot-btn:hover{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.2)}
+.slot-btn.taken{opacity:.3;cursor:not-allowed;pointer-events:none}
+.slot-tag{font-size:9px;letter-spacing:1px;background:rgba(245,200,66,.12);color:var(--gold);border:1px solid rgba(245,200,66,.2);padding:2px 6px;border-radius:4px;min-width:36px;text-align:center}
+.slot-name{flex:1}
+.slot-taken-txt{font-size:11px;color:var(--silver)}
+
+/* roster card */
+.rcard{background:var(--surf);border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:12px}
+.rcard-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--silver);margin-bottom:11px;display:flex;justify-content:space-between}
+.rline{margin-bottom:10px}
+.rline-lbl{font-size:9px;letter-spacing:2px;text-transform:uppercase;color:rgba(255,255,255,.3);margin-bottom:5px}
+.rline-slots{display:flex;gap:5px}
+.rslot{flex:1;background:rgba(255,255,255,.025);border:1px dashed rgba(255,255,255,.08);border-radius:7px;padding:7px 5px;text-align:center;min-height:54px;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:all .25s}
+.rslot.filled{border-style:solid;border-color:rgba(255,255,255,.12);background:rgba(255,255,255,.04)}
+.rslot.filled.slF{border-color:rgba(224,120,95,.25);background:rgba(224,120,95,.04)}
+.rslot.filled.slD{border-color:rgba(127,168,216,.25);background:rgba(127,168,216,.04)}
+.rslot.filled.slG{border-color:rgba(111,207,151,.25);background:rgba(111,207,151,.04)}
+.rs-pos{font-size:8px;letter-spacing:1px;color:var(--silver);margin-bottom:2px}
+.rs-name{font-size:9px;font-weight:600;line-height:1.3;max-width:56px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.rs-rat{font-family:'Bebas Neue',sans-serif;font-size:12px;color:var(--gold)}
+.rs-ico{font-size:16px;color:rgba(255,255,255,.15)}
+
+/* ---- BRACKET ---- */
+.bracket-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px}
+.bracket-group{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:12px}
+.bg-title{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--teal);margin-bottom:8px}
+.bracket-team{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px}
+.bracket-team:last-child{border-bottom:none}
+.bt-seed{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--silver);min-width:18px}
+.bt-flag{font-size:18px}
+.bt-name{flex:1;font-weight:500}
+.bt-str{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--gold)}
+.you-badge{font-size:9px;background:rgba(245,200,66,.15);color:var(--gold);border:1px solid rgba(245,200,66,.25);padding:1px 5px;border-radius:3px;letter-spacing:1px}
+
+/* ---- GAME CLOCK ---- */
+.game-clock-area{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;margin-bottom:12px}
+.clock-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.clock-period{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--teal)}
+.clock-time{font-family:'Bebas Neue',sans-serif;font-size:52px;color:#fff;letter-spacing:3px;line-height:1;text-align:center}
+.clock-score{display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:12px}
+.cs-team{text-align:center;min-width:90px}
+.cs-flag{font-size:28px;display:block}
+.cs-name{font-size:11px;color:var(--silver);font-weight:600;letter-spacing:1px;text-transform:uppercase;margin-top:2px}
+.cs-score{font-family:'Bebas Neue',sans-serif;font-size:58px;line-height:1;margin-top:2px}
+.cs-score.leading{color:var(--gold)}
+.cs-score.trailing{color:var(--silver);opacity:.6}
+.cs-score.tied{color:#fff}
+.cs-sep{font-family:'Bebas Neue',sans-serif;font-size:36px;color:rgba(255,255,255,.2)}
+.period-bar{display:flex;justify-content:center;gap:6px;margin-bottom:8px}
+.pb-seg{height:4px;flex:1;max-width:80px;border-radius:2px;background:rgba(255,255,255,.1);transition:background .5s}
+.pb-seg.active{background:var(--gold)}
+.pb-seg.done{background:var(--teal)}
+
+.event-feed{max-height:180px;overflow-y:auto;display:flex;flex-direction:column-reverse;gap:4px}
+.ev{display:flex;align-items:flex-start;gap:8px;padding:7px 10px;border-radius:7px;font-size:12px;animation:fadeUp .3s ease both}
+.ev.goal{background:rgba(245,200,66,.08);border:1px solid rgba(245,200,66,.15)}
+.ev.penalty{background:rgba(214,48,48,.06);border:1px solid rgba(214,48,48,.15)}
+.ev.save{background:rgba(29,143,160,.06);border:1px solid rgba(29,143,160,.15)}
+.ev.info{background:rgba(255,255,255,.03);border:1px solid var(--border)}
+.ev-time{font-family:'Bebas Neue',sans-serif;font-size:14px;color:var(--silver);min-width:38px}
+.ev-icon{font-size:16px;min-width:20px}
+.ev-text{color:#fff;flex:1;line-height:1.4}
+.ev-text .dim{color:var(--silver)}
+
+.intermission-screen{text-align:center;padding:28px 16px}
+.im-title{font-family:'Bebas Neue',sans-serif;font-size:32px;letter-spacing:3px;color:var(--gold);margin-bottom:8px}
+.im-subtitle{color:var(--silver);font-size:14px;margin-bottom:20px}
+.im-scores{display:flex;justify-content:center;align-items:center;gap:24px;margin-bottom:20px}
+.im-team{text-align:center}
+.im-flag{font-size:40px;display:block;margin-bottom:6px}
+.im-score-num{font-family:'Bebas Neue',sans-serif;font-size:56px;line-height:1}
+.im-team-name{font-size:12px;color:var(--silver);letter-spacing:2px;text-transform:uppercase;margin-top:4px}
+.im-sep{font-family:'Bebas Neue',sans-serif;font-size:32px;color:rgba(255,255,255,.2)}
+
+.period-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:16px}
+.pstat{background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:10px;text-align:center}
+.pstat .num{font-family:'Bebas Neue',sans-serif;font-size:22px;color:var(--gold);line-height:1}
+.pstat .lbl{font-size:10px;color:var(--silver);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+
+/* box score table */
+.bs-table{background:var(--card);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:10px}
+.bs-thead{display:grid;grid-template-columns:1fr 36px 36px 36px 36px;background:rgba(255,255,255,.04);padding:8px 12px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--silver);border-bottom:1px solid var(--border)}
+.bs-thead div:not(:first-child){text-align:center}
+.bs-row2{display:grid;grid-template-columns:1fr 36px 36px 36px 36px;align-items:center;padding:7px 12px;border-bottom:1px solid rgba(255,255,255,.035)}
+.bs-row2:last-child{border-bottom:none}
+.bs-row2:hover{background:rgba(255,255,255,.025)}
+.bsp{display:flex;align-items:center;gap:7px}
+.bsp-pos{font-size:8px;font-weight:700;min-width:22px;padding:1px 3px;border-radius:3px;text-align:center}
+.bsp-name{font-size:12px;font-weight:500}
+.bsc{text-align:center;font-family:'Bebas Neue',sans-serif;font-size:15px;color:var(--silver)}
+.bsc.hi{color:var(--gold)}
+.bs-section-lbl{background:rgba(255,255,255,.04);padding:5px 12px;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+
+/* shootout */
+.shootout-grid{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:12px 0}
+.shot-cell{width:36px;height:36px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;transition:all .4s}
+.shot-cell.goal{border-color:var(--green);background:rgba(60,179,113,.15)}
+.shot-cell.miss{border-color:var(--red);background:rgba(214,48,48,.1)}
+.shot-cell.pending{border-color:rgba(255,255,255,.2)}
+
+/* results */
+.medal-block{text-align:center;padding:24px 0 18px;animation:popIn .6s cubic-bezier(.34,1.56,.64,1) both}
+.medal-icon{font-size:72px;filter:drop-shadow(0 0 26px rgba(245,200,66,.42))}
+.medal-title{font-family:'Bebas Neue',sans-serif;font-size:38px;letter-spacing:3px;margin-top:8px;line-height:1}
+.medal-sub{color:var(--silver);font-size:13px;margin-top:5px}
+.res-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:16px 0}
+.rs{background:var(--surf);border:1px solid var(--border);border-radius:10px;padding:12px;text-align:center}
+.rs .big{font-family:'Bebas Neue',sans-serif;font-size:28px;color:var(--gold);line-height:1}
+.rs .sm{font-size:10px;color:var(--silver);letter-spacing:1px;text-transform:uppercase;margin-top:3px}
+.share-box{background:linear-gradient(135deg,var(--card),rgba(26,79,138,.2));border:1px solid rgba(245,200,66,.15);border-radius:12px;padding:15px;margin:12px 0}
+.share-lbl{font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--gold);margin-bottom:7px}
+.share-code{font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:2px;color:#fff;background:rgba(255,255,255,.04);padding:8px 11px;border-radius:7px;word-break:break-all;cursor:pointer;border:1px solid rgba(255,255,255,.08);transition:background .18s}
+.share-code:hover{background:rgba(255,255,255,.09)}
+.share-hint{font-size:11px;color:var(--silver);margin-top:5px}
+.final-list{margin-top:10px}
+.fp{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:12px}
+.fp:last-child{border-bottom:none}
+.fp-flag{font-size:16px}.fp-name{flex:1;font-weight:500}.fp-pos{font-size:10px;color:var(--silver);min-width:28px}
+.fp-nat{font-size:10px;color:var(--silver)}.fp-rat{font-family:'Bebas Neue',sans-serif;font-size:16px;color:var(--gold)}
+.section-hdr{background:rgba(255,255,255,.04);padding:5px 0;font-size:9px;letter-spacing:2px;text-transform:uppercase;color:var(--teal);margin:8px 0 4px}
+
+.tp-round{display:flex;align-items:center;gap:9px;font-size:12px;padding:5px 0;border-bottom:1px solid var(--border)}
+.tp-round:last-child{border-bottom:none}
+.tp-status{font-size:15px;min-width:19px}.tp-name{flex:1;color:var(--silver)}
+.tp-res{font-family:'Bebas Neue',sans-serif;font-size:13px;letter-spacing:1px}
+.tp-res.win{color:var(--green)}.tp-res.loss{color:#e07070}.tp-res.next{color:var(--gold)}
+
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes slideIn{from{opacity:0;transform:translateX(26px) scale(.97)}to{opacity:1;transform:translateX(0) scale(1)}}
+@keyframes slideUp{from{opacity:0;transform:translateY(40px)}to{opacity:1;transform:translateY(0)}}
+@keyframes popIn{from{opacity:0;transform:scale(.72)}to{opacity:1;transform:scale(1)}}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(66px);background:var(--surf);border:1px solid var(--border);border-radius:9px;padding:10px 16px;font-size:13px;transition:transform .28s cubic-bezier(.34,1.56,.64,1);z-index:999;white-space:nowrap}
+.toast.show{transform:translateX(-50%) translateY(0)}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div class="logo">GOLD RUSH</div>
+  <div class="logo-sub">Olympic Hockey Draft · Build Your Dream Roster</div>
+</header>
+
+<!-- ===== STRATEGY SCREEN ===== -->
+<div class="screen active" id="sc-strategy">
+  <div class="sec-title">Game Settings</div>
+  <div class="sec-desc">Set your overtime format and difficulty. You'll choose your strategy after drafting, once you know your roster.</div>
+  <div class="surf" style="margin-bottom:14px">
+    <div class="lbl">Overtime Format</div>
+    <div class="mbt-row">
+      <button class="mbt on" id="ot-sd" onclick="setOT('sd')">Sudden Death OT<small>First goal wins</small></button>
+      <button class="mbt" id="ot-so" onclick="setOT('so')">10 min OT + Shootout<small>If still tied, shootout</small></button>
+    </div>
+  </div>
+  <div class="surf" style="margin-bottom:14px">
+    <div class="lbl">Difficulty Mode</div>
+    <div class="mbt-row">
+      <button class="mbt on" id="mb-classic" onclick="setMode('classic')">Classic<small>Ratings visible</small></button>
+      <button class="mbt" id="mb-blind" onclick="setMode('blind')">Blind<small>Test your knowledge</small></button>
+    </div>
+  </div>
+  <button class="btn btn-gold btn-full" id="start-btn" onclick="startDraft()">Start Drafting →</button>
+</div>
+
+<!-- ===== DRAFT SCREEN ===== -->
+<div class="screen" id="sc-draft">
+  <div class="hud">
+    <div class="hud-s"><div class="hv" id="h-left">20</div><div class="hl">Picks Left</div></div>
+    <div class="hud-s"><div class="hv" id="h-avg">—</div><div class="hl">Team Avg</div></div>
+    
+    <div class="hud-s"><div class="hv" id="h-nation">—</div><div class="hl">Nations</div></div>
+  </div>
+  <div class="prog-bar"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+  <div id="roll-area"></div>
+  <div class="rcard">
+    <div class="rcard-title"><span>Your Lineup</span><span id="roster-count" style="color:var(--gold)">0 / 20</span></div>
+    <div id="lineup-display"></div>
+  </div>
+  <button class="btn btn-gold btn-full" id="sim-btn" onclick="goToBracket()" disabled>View Tournament Bracket →</button>
+</div>
+
+<!-- ===== BRACKET SCREEN ===== -->
+<div class="screen" id="sc-bracket">
+  <div class="sec-title">Tournament Bracket</div>
+  <div class="sec-desc" id="bracket-desc">Your team has been seeded. Study the bracket — then start the tournament.</div>
+  <div id="bracket-display"></div>
+  <button class="btn btn-gold btn-full" onclick="startTournament()">Start Tournament →</button>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div class="screen" id="sc-game">
+  <div id="game-content"></div>
+</div>
+
+<!-- ===== RESULTS SCREEN ===== -->
+<div class="screen" id="sc-results">
+  <div class="medal-block" id="medal-block"></div>
+  <div class="res-stats" id="res-stats"></div>
+  <div class="surf" id="tourney-summary"></div>
+
+  <div class="final-list" id="final-list"></div>
+  <br>
+  <button class="btn btn-ghost btn-full" onclick="restart()">Play Again</button>
+</div>
+</div>
+
+<!-- SLOT MODAL -->
+<div id="modal-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:500;align-items:flex-end;justify-content:center;"></div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ================================================================
+// PLAYER DATABASE
+// Each player has: name, pos (F/D/G), subpos (LW/C/RW/LD/RD/G), rating
+// Nations: one nation appears only once in any simulation
+// ================================================================
+const NATIONS = {
+  "Canada 2026":{flag:"🇨🇦",nation:"Canada",players:[
+    {name:"Connor McDavid",pos:"F",sub:"C",rating:97},
+    {name:"Nathan MacKinnon",pos:"F",sub:"C",rating:96},
+    {name:"Sidney Crosby",pos:"F",sub:"C",rating:94},
+    {name:"Mark Scheifele",pos:"F",sub:"C",rating:88},
+    {name:"Mitch Marner",pos:"F",sub:"RW",rating:89},
+    {name:"Alex DeBrincat",pos:"F",sub:"LW",rating:85},
+    {name:"Sam Bennett",pos:"F",sub:"C",rating:84},
+    {name:"Seth Jarvis",pos:"F",sub:"RW",rating:83},
+    {name:"Brandon Hagel",pos:"F",sub:"LW",rating:82},
+    {name:"Dylan Cozens",pos:"F",sub:"C",rating:82},
+    {name:"Josh Anderson",pos:"F",sub:"RW",rating:80},
+    {name:"Brock Nelson",pos:"F",sub:"C",rating:81},
+    {name:"Cale Makar",pos:"D",sub:"RD",rating:95},
+    {name:"Devon Toews",pos:"D",sub:"LD",rating:88},
+    {name:"Travis Sanheim",pos:"D",sub:"LD",rating:83},
+    {name:"Noah Hanifin",pos:"D",sub:"RD",rating:85},
+    {name:"Shea Theodore",pos:"D",sub:"RD",rating:84},
+    {name:"Thomas Chabot",pos:"D",sub:"LD",rating:83},
+    {name:"Jordan Binnington",pos:"G",sub:"G",rating:87},
+    {name:"Adin Hill",pos:"G",sub:"G",rating:85},
+  ]},
+  "USA 2026":{flag:"🇺🇸",nation:"USA",players:[
+    {name:"Jack Eichel",pos:"F",sub:"C",rating:94},
+    {name:"Auston Matthews",pos:"F",sub:"C",rating:94},
+    {name:"Jack Hughes",pos:"F",sub:"C",rating:91},
+    {name:"Matthew Tkachuk",pos:"F",sub:"LW",rating:92},
+    {name:"Brady Tkachuk",pos:"F",sub:"LW",rating:89},
+    {name:"Jake Guentzel",pos:"F",sub:"LW",rating:86},
+    {name:"Kyle Connor",pos:"F",sub:"LW",rating:87},
+    {name:"Tage Thompson",pos:"F",sub:"C",rating:89},
+    {name:"Clayton Keller",pos:"F",sub:"RW",rating:86},
+    {name:"Dylan Larkin",pos:"F",sub:"C",rating:86},
+    {name:"Alex Tuch",pos:"F",sub:"RW",rating:82},
+    {name:"JT Compher",pos:"F",sub:"C",rating:79},
+    {name:"Quinn Hughes",pos:"D",sub:"LD",rating:95},
+    {name:"Charlie McAvoy",pos:"D",sub:"RD",rating:89},
+    {name:"Seth Jones",pos:"D",sub:"RD",rating:87},
+    {name:"Noah Hanifin",pos:"D",sub:"LD",rating:85},
+    {name:"Jaccob Slavin",pos:"D",sub:"RD",rating:84},
+    {name:"Brock Faber",pos:"D",sub:"LD",rating:84},
+    {name:"Connor Hellebuyck",pos:"G",sub:"G",rating:96},
+    {name:"Jake Oettinger",pos:"G",sub:"G",rating:88},
+  ]},
+  "Sweden 2026":{flag:"🇸🇪",nation:"Sweden",players:[
+    {name:"Filip Forsberg",pos:"F",sub:"LW",rating:91},
+    {name:"William Nylander",pos:"F",sub:"RW",rating:89},
+    {name:"Lucas Raymond",pos:"F",sub:"RW",rating:87},
+    {name:"Gabriel Landeskog",pos:"F",sub:"LW",rating:86},
+    {name:"Adrian Kempe",pos:"F",sub:"C",rating:84},
+    {name:"Elias Lindholm",pos:"F",sub:"C",rating:84},
+    {name:"Rickard Rakell",pos:"F",sub:"C",rating:82},
+    {name:"Jesper Bratt",pos:"F",sub:"LW",rating:83},
+    {name:"Joel Eriksson Ek",pos:"F",sub:"C",rating:81},
+    {name:"Oscar Sundqvist",pos:"F",sub:"C",rating:78},
+    {name:"Pontus Holmberg",pos:"F",sub:"RW",rating:76},
+    {name:"Nils Hoglander",pos:"F",sub:"LW",rating:79},
+    {name:"Victor Hedman",pos:"D",sub:"LD",rating:92},
+    {name:"Rasmus Dahlin",pos:"D",sub:"RD",rating:91},
+    {name:"Erik Karlsson",pos:"D",sub:"RD",rating:88},
+    {name:"Hampus Lindholm",pos:"D",sub:"LD",rating:86},
+    {name:"Jonas Brodin",pos:"D",sub:"LD",rating:84},
+    {name:"Gustav Forsling",pos:"D",sub:"RD",rating:84},
+    {name:"Jacob Markstrom",pos:"G",sub:"G",rating:87},
+    {name:"Filip Gustavsson",pos:"G",sub:"G",rating:86},
+  ]},
+  "Finland 2026":{flag:"🇫🇮",nation:"Finland",players:[
+    {name:"Mikko Rantanen",pos:"F",sub:"RW",rating:93},
+    {name:"Sebastian Aho",pos:"F",sub:"C",rating:89},
+    {name:"Patrik Laine",pos:"F",sub:"LW",rating:87},
+    {name:"Roope Hintz",pos:"F",sub:"C",rating:86},
+    {name:"Teuvo Teravainen",pos:"F",sub:"RW",rating:84},
+    {name:"Joel Armia",pos:"F",sub:"RW",rating:79},
+    {name:"Mikael Granlund",pos:"F",sub:"C",rating:81},
+    {name:"Arttu Ruotsalainen",pos:"F",sub:"C",rating:78},
+    {name:"Eeli Tolvanen",pos:"F",sub:"LW",rating:78},
+    {name:"Niko Ojamaki",pos:"F",sub:"RW",rating:76},
+    {name:"Kasperi Kapanen",pos:"F",sub:"RW",rating:79},
+    {name:"Iiro Pakarinen",pos:"F",sub:"LW",rating:74},
+    {name:"Miro Heiskanen",pos:"D",sub:"RD",rating:90},
+    {name:"Olli Maatta",pos:"D",sub:"LD",rating:80},
+    {name:"Niko Mikkola",pos:"D",sub:"LD",rating:78},
+    {name:"Sami Vatanen",pos:"D",sub:"RD",rating:79},
+    {name:"Miika Koivisto",pos:"D",sub:"LD",rating:76},
+    {name:"Atte Ohtamaa",pos:"D",sub:"RD",rating:74},
+    {name:"Juuse Saros",pos:"G",sub:"G",rating:89},
+    {name:"Joonas Korpisalo",pos:"G",sub:"G",rating:83},
+  ]},
+  "Germany 2026":{flag:"🇩🇪",nation:"Germany",players:[
+    {name:"Leon Draisaitl",pos:"F",sub:"C",rating:96},
+    {name:"Lukas Reichel",pos:"F",sub:"LW",rating:81},
+    {name:"Nico Sturm",pos:"F",sub:"C",rating:78},
+    {name:"Marcel Noebels",pos:"F",sub:"RW",rating:76},
+    {name:"Tom Kuhnhackl",pos:"F",sub:"RW",rating:74},
+    {name:"Yasin Ehliz",pos:"F",sub:"RW",rating:73},
+    {name:"Stefan Loibl",pos:"F",sub:"C",rating:72},
+    {name:"Maximilian Kastner",pos:"F",sub:"LW",rating:71},
+    {name:"Frederik Tiffels",pos:"F",sub:"LW",rating:71},
+    {name:"Daniel Fischbuch",pos:"F",sub:"C",rating:70},
+    {name:"Patrick Reimer",pos:"F",sub:"RW",rating:71},
+    {name:"Nicolas Krammer",pos:"F",sub:"C",rating:69},
+    {name:"Moritz Seider",pos:"D",sub:"RD",rating:87},
+    {name:"Jonas Siegenthaler",pos:"D",sub:"LD",rating:82},
+    {name:"Tobias Fohrler",pos:"D",sub:"LD",rating:74},
+    {name:"Korbinian Holzer",pos:"D",sub:"RD",rating:73},
+    {name:"Dominik Bittner",pos:"D",sub:"LD",rating:72},
+    {name:"John Peterka",pos:"D",sub:"RD",rating:72},
+    {name:"Philipp Grubauer",pos:"G",sub:"G",rating:83},
+    {name:"Thomas Greiss",pos:"G",sub:"G",rating:78},
+  ]},
+  "Czechia 2026":{flag:"🇨🇿",nation:"Czechia",players:[
+    {name:"David Pastrnak",pos:"F",sub:"RW",rating:94},
+    {name:"Tomas Hertl",pos:"F",sub:"C",rating:84},
+    {name:"Ondrej Palat",pos:"F",sub:"LW",rating:83},
+    {name:"Roman Cervenka",pos:"F",sub:"C",rating:78},
+    {name:"Jakub Vrana",pos:"F",sub:"LW",rating:80},
+    {name:"Jakub Lauko",pos:"F",sub:"RW",rating:76},
+    {name:"Lukas Sedlak",pos:"F",sub:"C",rating:74},
+    {name:"Michael Spacek",pos:"F",sub:"LW",rating:74},
+    {name:"Matej Blumel",pos:"F",sub:"RW",rating:73},
+    {name:"Jan Kovář",pos:"F",sub:"C",rating:76},
+    {name:"Tomas Plekanec",pos:"F",sub:"C",rating:74},
+    {name:"Jiri Smejkal",pos:"F",sub:"RW",rating:72},
+    {name:"Radko Gudas",pos:"D",sub:"RD",rating:82},
+    {name:"Filip Hronek",pos:"D",sub:"RD",rating:85},
+    {name:"Lukas Klok",pos:"D",sub:"LD",rating:76},
+    {name:"Jan Rutta",pos:"D",sub:"LD",rating:78},
+    {name:"Michal Kempny",pos:"D",sub:"LD",rating:76},
+    {name:"Libor Sulak",pos:"D",sub:"RD",rating:74},
+    {name:"Vitek Vanecek",pos:"G",sub:"G",rating:83},
+    {name:"Dan Vladar",pos:"G",sub:"G",rating:82},
+  ]},
+  "Switzerland 2026":{flag:"🇨🇭",nation:"Switzerland",players:[
+    {name:"Nico Hischier",pos:"F",sub:"C",rating:88},
+    {name:"Kevin Fiala",pos:"F",sub:"LW",rating:87},
+    {name:"Timo Meier",pos:"F",sub:"LW",rating:88},
+    {name:"Nino Niederreiter",pos:"F",sub:"RW",rating:82},
+    {name:"Sven Andrighetto",pos:"F",sub:"RW",rating:78},
+    {name:"Pius Suter",pos:"F",sub:"C",rating:79},
+    {name:"Damien Riat",pos:"F",sub:"RW",rating:76},
+    {name:"Denis Malgin",pos:"F",sub:"C",rating:77},
+    {name:"Grégory Hofmann",pos:"F",sub:"LW",rating:75},
+    {name:"Philipp Kurashev",pos:"F",sub:"C",rating:76},
+    {name:"Enzo Corvi",pos:"F",sub:"C",rating:74},
+    {name:"Christoph Bertschy",pos:"F",sub:"LW",rating:73},
+    {name:"Roman Josi",pos:"D",sub:"RD",rating:92},
+    {name:"Janis Moser",pos:"D",sub:"LD",rating:80},
+    {name:"Dean Kukan",pos:"D",sub:"LD",rating:76},
+    {name:"Raphael Diaz",pos:"D",sub:"RD",rating:75},
+    {name:"Mirco Mueller",pos:"D",sub:"LD",rating:76},
+    {name:"Santeri Alatalo",pos:"D",sub:"RD",rating:74},
+    {name:"Akira Schmid",pos:"G",sub:"G",rating:84},
+    {name:"Leonardo Genoni",pos:"G",sub:"G",rating:82},
+  ]},
+  "Slovakia 2026":{flag:"🇸🇰",nation:"Slovakia",players:[
+    {name:"Juraj Slafkovsky",pos:"F",sub:"LW",rating:82},
+    {name:"Tomas Tatar",pos:"F",sub:"LW",rating:81},
+    {name:"Martin Pospisil",pos:"F",sub:"C",rating:78},
+    {name:"Michal Krutil",pos:"F",sub:"RW",rating:73},
+    {name:"Adam Ruzicka",pos:"F",sub:"C",rating:77},
+    {name:"Robert Lantosi",pos:"F",sub:"RW",rating:74},
+    {name:"Libor Hudacek",pos:"F",sub:"LW",rating:76},
+    {name:"Milos Roman",pos:"F",sub:"C",rating:75},
+    {name:"Peter Cehlarik",pos:"F",sub:"LW",rating:74},
+    {name:"Matus Sukel",pos:"F",sub:"C",rating:72},
+    {name:"Marek Hrivik",pos:"F",sub:"RW",rating:72},
+    {name:"Ladislav Nagy Jr",pos:"F",sub:"LW",rating:71},
+    {name:"Erik Cernak",pos:"D",sub:"RD",rating:85},
+    {name:"Simon Nemec",pos:"D",sub:"RD",rating:82},
+    {name:"Martin Fehervary",pos:"D",sub:"LD",rating:82},
+    {name:"Andrej Golian",pos:"D",sub:"LD",rating:74},
+    {name:"Michal Ivan",pos:"D",sub:"RD",rating:73},
+    {name:"David Griger",pos:"D",sub:"LD",rating:72},
+    {name:"Roman Reway",pos:"G",sub:"G",rating:76},
+    {name:"Patrik Rybar",pos:"G",sub:"G",rating:78},
+  ]},
+  "Latvia 2026":{flag:"🇱🇻",nation:"Latvia",players:[
+    {name:"Zemgus Girgensons",pos:"F",sub:"LW",rating:77},
+    {name:"Rodrigo Abols",pos:"F",sub:"C",rating:76},
+    {name:"Teddy Blueger",pos:"F",sub:"C",rating:76},
+    {name:"Martins Dzierkals",pos:"F",sub:"RW",rating:74},
+    {name:"Rihards Bukarts",pos:"F",sub:"LW",rating:73},
+    {name:"Rolands Kennins",pos:"F",sub:"LW",rating:72},
+    {name:"Andris Jelisejevs",pos:"F",sub:"C",rating:71},
+    {name:"Renars Krastenbergs",pos:"F",sub:"RW",rating:70},
+    {name:"Haralds Egle",pos:"F",sub:"C",rating:69},
+    {name:"Roberts Bukarts",pos:"F",sub:"LW",rating:71},
+    {name:"Gints Meija",pos:"F",sub:"RW",rating:68},
+    {name:"Janis Jaks",pos:"F",sub:"C",rating:68},
+    {name:"Uvis Balinskis",pos:"D",sub:"RD",rating:78},
+    {name:"Kristians Rubins",pos:"D",sub:"LD",rating:74},
+    {name:"Sandis Smons",pos:"D",sub:"LD",rating:72},
+    {name:"Edgars Kulda",pos:"D",sub:"RD",rating:71},
+    {name:"Ralfs Freibergs",pos:"D",sub:"LD",rating:70},
+    {name:"Davis Freiberg",pos:"D",sub:"RD",rating:70},
+    {name:"Elvis Merzlikins",pos:"G",sub:"G",rating:83},
+    {name:"Arturs Silovs",pos:"G",sub:"G",rating:80},
+  ]},
+  "Denmark 2026":{flag:"🇩🇰",nation:"Denmark",players:[
+    {name:"Nikolaj Ehlers",pos:"F",sub:"LW",rating:86},
+    {name:"Oliver Bjorkstrand",pos:"F",sub:"RW",rating:83},
+    {name:"Lars Eller",pos:"F",sub:"C",rating:78},
+    {name:"Mikkel Boedker",pos:"F",sub:"LW",rating:74},
+    {name:"Jesper Jensen",pos:"F",sub:"C",rating:72},
+    {name:"Mathias Bau",pos:"F",sub:"C",rating:71},
+    {name:"Emil Kristensen",pos:"F",sub:"LW",rating:70},
+    {name:"Morten Poulsen",pos:"F",sub:"RW",rating:69},
+    {name:"Daniel Nielsen",pos:"F",sub:"C",rating:68},
+    {name:"Peter Regin",pos:"F",sub:"C",rating:72},
+    {name:"Joachim Blichfeld",pos:"F",sub:"RW",rating:71},
+    {name:"Julian Jakobsen",pos:"F",sub:"LW",rating:68},
+    {name:"Markus Lauridsen",pos:"D",sub:"RD",rating:75},
+    {name:"Stefan Lassen",pos:"D",sub:"LD",rating:73},
+    {name:"Oliver Lauridsen",pos:"D",sub:"LD",rating:72},
+    {name:"Philip Schultz",pos:"D",sub:"RD",rating:70},
+    {name:"Jesper Poulsen",pos:"D",sub:"LD",rating:69},
+    {name:"Lasse Lassen",pos:"D",sub:"RD",rating:68},
+    {name:"Frederik Andersen",pos:"G",sub:"G",rating:85},
+    {name:"Sebastian Dahm",pos:"G",sub:"G",rating:77},
+  ]},
+  "Italy 2026":{flag:"🇮🇹",nation:"Italy",players:[
+    {name:"Diego Kostner",pos:"F",sub:"C",rating:72},
+    {name:"Daniel Mantenuto",pos:"F",sub:"LW",rating:71},
+    {name:"Marco Rosa",pos:"F",sub:"RW",rating:70},
+    {name:"Alex Petan",pos:"F",sub:"C",rating:71},
+    {name:"Luca Zanatta",pos:"F",sub:"LW",rating:69},
+    {name:"Brett Findlay",pos:"F",sub:"C",rating:68},
+    {name:"Raphael Andergassen",pos:"F",sub:"RW",rating:68},
+    {name:"Frank Hora",pos:"F",sub:"LW",rating:67},
+    {name:"Stefano Marchetti",pos:"F",sub:"C",rating:67},
+    {name:"Justin Fazio",pos:"F",sub:"RW",rating:67},
+    {name:"Ivan Deluca",pos:"F",sub:"LW",rating:66},
+    {name:"Jake Massie",pos:"F",sub:"C",rating:66},
+    {name:"Thomas Larkin",pos:"D",sub:"RD",rating:74},
+    {name:"Angelo Miceli",pos:"D",sub:"LD",rating:69},
+    {name:"Sean Flanagan",pos:"D",sub:"RD",rating:68},
+    {name:"Alex Trivellato",pos:"D",sub:"LD",rating:67},
+    {name:"Daniel Frank",pos:"D",sub:"LD",rating:66},
+    {name:"Ivan Tauferer",pos:"D",sub:"RD",rating:65},
+    {name:"Damian Clara",pos:"G",sub:"G",rating:75},
+    {name:"Davide Fadani",pos:"G",sub:"G",rating:72},
+  ]},
+  "Russia 2022":{flag:"🇷🇺",nation:"Russia",players:[
+    {name:"Nikita Kucherov",pos:"F",sub:"RW",rating:96},
+    {name:"Artemi Panarin",pos:"F",sub:"LW",rating:92},
+    {name:"Kirill Kaprizov",pos:"F",sub:"LW",rating:91},
+    {name:"Evgeni Malkin",pos:"F",sub:"C",rating:89},
+    {name:"Alexander Ovechkin",pos:"F",sub:"LW",rating:90},
+    {name:"Valeri Nichushkin",pos:"F",sub:"RW",rating:86},
+    {name:"Pavel Buchnevich",pos:"F",sub:"LW",rating:86},
+    {name:"Vadim Shipachyov",pos:"F",sub:"C",rating:83},
+    {name:"Anton Slepyshev",pos:"F",sub:"LW",rating:78},
+    {name:"Maxim Mamin",pos:"F",sub:"C",rating:77},
+    {name:"Vladislav Gavrikov",pos:"F",sub:"C",rating:78},
+    {name:"Stepan Falkovsky",pos:"F",sub:"RW",rating:76},
+    {name:"Mikhail Sergachev",pos:"D",sub:"LD",rating:87},
+    {name:"Ivan Provorov",pos:"D",sub:"RD",rating:82},
+    {name:"Dmitry Orlov",pos:"D",sub:"LD",rating:82},
+    {name:"Artem Zub",pos:"D",sub:"RD",rating:81},
+    {name:"Yegor Rykov",pos:"D",sub:"LD",rating:78},
+    {name:"Alexei Marchenko",pos:"D",sub:"RD",rating:77},
+    {name:"Andrei Vasilevskiy",pos:"G",sub:"G",rating:93},
+    {name:"Igor Shesterkin",pos:"G",sub:"G",rating:91},
+  ]},
+  "Canada 2022":{flag:"🇨🇦",nation:"Canada",players:[
+    {name:"Connor McDavid",pos:"F",sub:"C",rating:95},
+    {name:"Nathan MacKinnon",pos:"F",sub:"C",rating:94},
+    {name:"Sidney Crosby",pos:"F",sub:"C",rating:91},
+    {name:"Brayden Point",pos:"F",sub:"LW",rating:90},
+    {name:"John Tavares",pos:"F",sub:"C",rating:87},
+    {name:"Nick Suzuki",pos:"F",sub:"RW",rating:84},
+    {name:"Maxime Comtois",pos:"F",sub:"LW",rating:79},
+    {name:"Brendan Gallagher",pos:"F",sub:"RW",rating:80},
+    {name:"Eric Staal",pos:"F",sub:"C",rating:79},
+    {name:"Mark Scheifele",pos:"F",sub:"C",rating:87},
+    {name:"Matt Duchene",pos:"F",sub:"C",rating:84},
+    {name:"Adam Henrique",pos:"F",sub:"C",rating:79},
+    {name:"Cale Makar",pos:"D",sub:"RD",rating:90},
+    {name:"Alex Pietrangelo",pos:"D",sub:"LD",rating:86},
+    {name:"Drew Doughty",pos:"D",sub:"RD",rating:84},
+    {name:"Chris Tanev",pos:"D",sub:"LD",rating:82},
+    {name:"Owen Power",pos:"D",sub:"LD",rating:80},
+    {name:"Josh Morrissey",pos:"D",sub:"RD",rating:83},
+    {name:"Tristan Jarry",pos:"G",sub:"G",rating:84},
+    {name:"Carter Hart",pos:"G",sub:"G",rating:83},
+  ]},
+  "Sweden 2014":{flag:"🇸🇪",nation:"Sweden",players:[
+    {name:"Henrik Lundqvist",pos:"G",sub:"G",rating:94},
+    {name:"Nicklas Backstrom",pos:"F",sub:"C",rating:90},
+    {name:"Daniel Sedin",pos:"F",sub:"LW",rating:89},
+    {name:"Henrik Sedin",pos:"F",sub:"C",rating:88},
+    {name:"Gabriel Landeskog",pos:"F",sub:"LW",rating:84},
+    {name:"Loui Eriksson",pos:"F",sub:"RW",rating:82},
+    {name:"Samuel Pahlsson",pos:"F",sub:"C",rating:77},
+    {name:"Johan Franzen",pos:"F",sub:"LW",rating:82},
+    {name:"Henrik Zetterberg",pos:"F",sub:"LW",rating:88},
+    {name:"Carl Hagelin",pos:"F",sub:"LW",rating:79},
+    {name:"Patric Hornqvist",pos:"F",sub:"RW",rating:81},
+    {name:"Marcus Kruger",pos:"F",sub:"C",rating:76},
+    {name:"Erik Karlsson",pos:"D",sub:"RD",rating:91},
+    {name:"Oliver Ekman-Larsson",pos:"D",sub:"LD",rating:87},
+    {name:"Johnny Oduya",pos:"D",sub:"RD",rating:82},
+    {name:"Niklas Kronwall",pos:"D",sub:"LD",rating:84},
+    {name:"Victor Hedman",pos:"D",sub:"LD",rating:88},
+    {name:"Alexander Edler",pos:"D",sub:"LD",rating:82},
+    {name:"Jonas Gustavsson",pos:"G",sub:"G",rating:80},
+    {name:"Jhonas Enroth",pos:"G",sub:"G",rating:78},
+  ]},
+  "Canada 2014":{flag:"🇨🇦",nation:"Canada",players:[
+    {name:"Sidney Crosby",pos:"F",sub:"C",rating:97},
+    {name:"Jonathan Toews",pos:"F",sub:"C",rating:93},
+    {name:"Steven Stamkos",pos:"F",sub:"C",rating:91},
+    {name:"Claude Giroux",pos:"F",sub:"C",rating:88},
+    {name:"Rick Nash",pos:"F",sub:"LW",rating:88},
+    {name:"Patrice Bergeron",pos:"F",sub:"C",rating:90},
+    {name:"Patrick Sharp",pos:"F",sub:"RW",rating:84},
+    {name:"Corey Perry",pos:"F",sub:"RW",rating:86},
+    {name:"Chris Kunitz",pos:"F",sub:"LW",rating:80},
+    {name:"Matt Duchene",pos:"F",sub:"C",rating:84},
+    {name:"Jeff Carter",pos:"F",sub:"C",rating:83},
+    {name:"Jay Bouwmeester",pos:"F",sub:"LW",rating:79},
+    {name:"Drew Doughty",pos:"D",sub:"RD",rating:92},
+    {name:"Shea Weber",pos:"D",sub:"LD",rating:91},
+    {name:"Alex Pietrangelo",pos:"D",sub:"RD",rating:86},
+    {name:"P.K. Subban",pos:"D",sub:"LD",rating:88},
+    {name:"Marc-Edouard Vlasic",pos:"D",sub:"LD",rating:84},
+    {name:"Duncan Keith",pos:"D",sub:"RD",rating:88},
+    {name:"Carey Price",pos:"G",sub:"G",rating:95},
+    {name:"Roberto Luongo",pos:"G",sub:"G",rating:87},
+  ]},
+  "USA 2014":{flag:"🇺🇸",nation:"USA",players:[
+    {name:"Patrick Kane",pos:"F",sub:"RW",rating:92},
+    {name:"Zach Parise",pos:"F",sub:"LW",rating:89},
+    {name:"Phil Kessel",pos:"F",sub:"RW",rating:88},
+    {name:"Ryan Kesler",pos:"F",sub:"C",rating:86},
+    {name:"T.J. Oshie",pos:"F",sub:"RW",rating:84},
+    {name:"David Backes",pos:"F",sub:"C",rating:82},
+    {name:"Max Pacioretty",pos:"F",sub:"LW",rating:84},
+    {name:"Paul Stastny",pos:"F",sub:"C",rating:82},
+    {name:"James van Riemsdyk",pos:"F",sub:"LW",rating:82},
+    {name:"Kyle Okposo",pos:"F",sub:"RW",rating:80},
+    {name:"Derek Stepan",pos:"F",sub:"C",rating:80},
+    {name:"Blake Wheeler",pos:"F",sub:"RW",rating:83},
+    {name:"Ryan Suter",pos:"D",sub:"RD",rating:88},
+    {name:"Ryan McDonagh",pos:"D",sub:"LD",rating:85},
+    {name:"Jack Johnson",pos:"D",sub:"LD",rating:78},
+    {name:"Kevin Shattenkirk",pos:"D",sub:"RD",rating:83},
+    {name:"Justin Faulk",pos:"D",sub:"RD",rating:82},
+    {name:"Cam Fowler",pos:"D",sub:"LD",rating:81},
+    {name:"Jonathan Quick",pos:"G",sub:"G",rating:91},
+    {name:"Ryan Miller",pos:"G",sub:"G",rating:88},
+  ]},
+  "Russia 2014":{flag:"🇷🇺",nation:"Russia",players:[
+    {name:"Alexander Ovechkin",pos:"F",sub:"LW",rating:96},
+    {name:"Evgeni Malkin",pos:"F",sub:"C",rating:94},
+    {name:"Pavel Datsyuk",pos:"F",sub:"C",rating:93},
+    {name:"Ilya Kovalchuk",pos:"F",sub:"LW",rating:89},
+    {name:"Alexander Radulov",pos:"F",sub:"RW",rating:86},
+    {name:"Evgeni Dadonov",pos:"F",sub:"RW",rating:82},
+    {name:"Alexei Tereshchenko",pos:"F",sub:"C",rating:77},
+    {name:"Nikolai Kulemin",pos:"F",sub:"LW",rating:80},
+    {name:"Maxim Afinogenov",pos:"F",sub:"RW",rating:79},
+    {name:"Viktor Tikhonov",pos:"F",sub:"RW",rating:78},
+    {name:"Pavel Bure Jr",pos:"F",sub:"LW",rating:74},
+    {name:"Fyodor Tyutin",pos:"F",sub:"C",rating:76},
+    {name:"Sergei Gonchar",pos:"D",sub:"LD",rating:82},
+    {name:"Alexei Emelin",pos:"D",sub:"RD",rating:79},
+    {name:"Slava Voynov",pos:"D",sub:"RD",rating:83},
+    {name:"Anton Belov",pos:"D",sub:"LD",rating:77},
+    {name:"Andrei Markov",pos:"D",sub:"LD",rating:82},
+    {name:"Nikita Nikitin",pos:"D",sub:"RD",rating:77},
+    {name:"Sergei Bobrovsky",pos:"G",sub:"G",rating:88},
+    {name:"Semyon Varlamov",pos:"G",sub:"G",rating:85},
+  ]},
+  "Finland 2014":{flag:"🇫🇮",nation:"Finland",players:[
+    {name:"Teemu Selanne",pos:"F",sub:"RW",rating:88},
+    {name:"Mikko Koivu",pos:"F",sub:"C",rating:87},
+    {name:"Aleksander Barkov",pos:"F",sub:"C",rating:83},
+    {name:"Jere Lehtinen",pos:"F",sub:"RW",rating:82},
+    {name:"Valtteri Filppula",pos:"F",sub:"LW",rating:81},
+    {name:"Jussi Jokinen",pos:"F",sub:"LW",rating:80},
+    {name:"Olli Jokinen",pos:"F",sub:"C",rating:79},
+    {name:"Mikael Granlund",pos:"F",sub:"C",rating:79},
+    {name:"Jarkko Ruutu",pos:"F",sub:"RW",rating:73},
+    {name:"Jori Lehtera",pos:"F",sub:"C",rating:78},
+    {name:"Leo Komarov",pos:"F",sub:"LW",rating:76},
+    {name:"Oskar Osala",pos:"F",sub:"RW",rating:72},
+    {name:"Sami Salo",pos:"D",sub:"RD",rating:80},
+    {name:"Olli Maatta",pos:"D",sub:"LD",rating:79},
+    {name:"Kimmo Timonen",pos:"D",sub:"RD",rating:81},
+    {name:"Sami Vatanen",pos:"D",sub:"LD",rating:78},
+    {name:"Joni Pitkanen",pos:"D",sub:"LD",rating:79},
+    {name:"Teemu Laakso",pos:"D",sub:"RD",rating:74},
+    {name:"Pekka Rinne",pos:"G",sub:"G",rating:90},
+    {name:"Tuukka Rask",pos:"G",sub:"G",rating:88},
+  ]},
+  "Canada 2010":{flag:"🇨🇦",nation:"Canada",players:[
+    {name:"Sidney Crosby",pos:"F",sub:"C",rating:96},
+    {name:"Joe Thornton",pos:"F",sub:"C",rating:91},
+    {name:"Rick Nash",pos:"F",sub:"LW",rating:88},
+    {name:"Dany Heatley",pos:"F",sub:"LW",rating:86},
+    {name:"Brendan Shanahan",pos:"F",sub:"RW",rating:81},
+    {name:"Jarome Iginla",pos:"F",sub:"RW",rating:87},
+    {name:"Mike Richards",pos:"F",sub:"C",rating:83},
+    {name:"Jonathan Toews",pos:"F",sub:"C",rating:88},
+    {name:"Brenden Morrow",pos:"F",sub:"LW",rating:79},
+    {name:"Patrick Marleau",pos:"F",sub:"LW",rating:82},
+    {name:"Ryan Getzlaf",pos:"F",sub:"C",rating:87},
+    {name:"Corey Perry",pos:"F",sub:"RW",rating:83},
+    {name:"Scott Niedermayer",pos:"D",sub:"LD",rating:87},
+    {name:"Chris Pronger",pos:"D",sub:"RD",rating:88},
+    {name:"Shea Weber",pos:"D",sub:"LD",rating:87},
+    {name:"Drew Doughty",pos:"D",sub:"RD",rating:85},
+    {name:"Dan Boyle",pos:"D",sub:"RD",rating:83},
+    {name:"Willie Mitchell",pos:"D",sub:"LD",rating:79},
+    {name:"Martin Brodeur",pos:"G",sub:"G",rating:89},
+    {name:"Roberto Luongo",pos:"G",sub:"G",rating:88},
+  ]},
+  "Russia 2010":{flag:"🇷🇺",nation:"Russia",players:[
+    {name:"Alexander Ovechkin",pos:"F",sub:"LW",rating:97},
+    {name:"Evgeni Malkin",pos:"F",sub:"C",rating:93},
+    {name:"Pavel Datsyuk",pos:"F",sub:"C",rating:92},
+    {name:"Ilya Kovalchuk",pos:"F",sub:"LW",rating:91},
+    {name:"Alexander Semin",pos:"F",sub:"RW",rating:84},
+    {name:"Evgeni Dadonov",pos:"F",sub:"RW",rating:79},
+    {name:"Maxim Afinogenov",pos:"F",sub:"RW",rating:82},
+    {name:"Alexei Morozov",pos:"F",sub:"LW",rating:80},
+    {name:"Nikolai Kulemin",pos:"F",sub:"LW",rating:79},
+    {name:"Sergei Fedorov",pos:"F",sub:"C",rating:81},
+    {name:"Mikhail Grabovski",pos:"F",sub:"C",rating:79},
+    {name:"Viktor Kozlov",pos:"F",sub:"C",rating:77},
+    {name:"Sergei Gonchar",pos:"D",sub:"LD",rating:85},
+    {name:"Dmitri Kalinin",pos:"D",sub:"RD",rating:79},
+    {name:"Alexei Zhitnik",pos:"D",sub:"LD",rating:81},
+    {name:"Denis Grebeshkov",pos:"D",sub:"RD",rating:78},
+    {name:"Fedor Tyutin",pos:"D",sub:"LD",rating:80},
+    {name:"Ilya Nikulin",pos:"D",sub:"RD",rating:79},
+    {name:"Evgeni Nabokov",pos:"G",sub:"G",rating:85},
+    {name:"Nikolai Khabibulin",pos:"G",sub:"G",rating:80},
+  ]},
+  "Canada 1998":{flag:"🇨🇦",nation:"Canada",players:[
+    {name:"Wayne Gretzky",pos:"F",sub:"C",rating:99},
+    {name:"Steve Yzerman",pos:"F",sub:"C",rating:94},
+    {name:"Paul Kariya",pos:"F",sub:"LW",rating:90},
+    {name:"Mark Recchi",pos:"F",sub:"RW",rating:84},
+    {name:"Eric Lindros",pos:"F",sub:"C",rating:91},
+    {name:"Brendan Shanahan",pos:"F",sub:"LW",rating:87},
+    {name:"Keith Primeau",pos:"F",sub:"C",rating:82},
+    {name:"Rob Zamuner",pos:"F",sub:"LW",rating:76},
+    {name:"Trevor Linden",pos:"F",sub:"C",rating:80},
+    {name:"Shayne Corson",pos:"F",sub:"LW",rating:78},
+    {name:"Joe Nieuwendyk",pos:"F",sub:"C",rating:83},
+    {name:"Theoren Fleury",pos:"F",sub:"RW",rating:84},
+    {name:"Rob Blake",pos:"D",sub:"RD",rating:88},
+    {name:"Al MacInnis",pos:"D",sub:"RD",rating:87},
+    {name:"Scott Stevens",pos:"D",sub:"LD",rating:89},
+    {name:"Chris Chelios",pos:"D",sub:"LD",rating:87},
+    {name:"Eric Desjardins",pos:"D",sub:"RD",rating:82},
+    {name:"Adam Foote",pos:"D",sub:"LD",rating:82},
+    {name:"Patrick Roy",pos:"G",sub:"G",rating:94},
+    {name:"Martin Brodeur",pos:"G",sub:"G",rating:90},
+  ]},
+  "Czech Rep. 1998":{flag:"🇨🇿",nation:"Czechia",players:[
+    {name:"Dominik Hasek",pos:"G",sub:"G",rating:96},
+    {name:"Jaromir Jagr",pos:"F",sub:"RW",rating:96},
+    {name:"Martin Straka",pos:"F",sub:"C",rating:84},
+    {name:"Robert Reichel",pos:"F",sub:"C",rating:83},
+    {name:"Jiri Dopita",pos:"F",sub:"C",rating:80},
+    {name:"Vladimir Ruzicka",pos:"F",sub:"LW",rating:81},
+    {name:"Martin Procházka",pos:"F",sub:"RW",rating:78},
+    {name:"Jan Caloun",pos:"F",sub:"RW",rating:76},
+    {name:"Jiri Kucera",pos:"F",sub:"LW",rating:75},
+    {name:"Otakar Vejvoda",pos:"F",sub:"C",rating:73},
+    {name:"Jaroslav Spacek",pos:"F",sub:"LW",rating:76},
+    {name:"Petr Cajanek",pos:"F",sub:"C",rating:75},
+    {name:"Petr Svoboda",pos:"D",sub:"LD",rating:80},
+    {name:"Roman Hamrlik",pos:"D",sub:"RD",rating:82},
+    {name:"Jiri Slegr",pos:"D",sub:"LD",rating:79},
+    {name:"Frantisek Kucera",pos:"D",sub:"RD",rating:78},
+    {name:"Richard Smehlik",pos:"D",sub:"LD",rating:79},
+    {name:"Pavel Patera",pos:"D",sub:"RD",rating:75},
+    {name:"Milan Hnilicka",pos:"G",sub:"G",rating:78},
+    {name:"Roman Cechmanek",pos:"G",sub:"G",rating:81},
+  ]},
+  "Russia 1998":{flag:"🇷🇺",nation:"Russia",players:[
+    {name:"Pavel Bure",pos:"F",sub:"RW",rating:95},
+    {name:"Sergei Fedorov",pos:"F",sub:"C",rating:94},
+    {name:"Alexei Yashin",pos:"F",sub:"C",rating:88},
+    {name:"Valeri Kamensky",pos:"F",sub:"LW",rating:87},
+    {name:"Alexei Zhamnov",pos:"F",sub:"C",rating:85},
+    {name:"Alexei Morozov",pos:"F",sub:"LW",rating:78},
+    {name:"German Titov",pos:"F",sub:"C",rating:79},
+    {name:"Dmitri Yushkevich",pos:"F",sub:"RW",rating:76},
+    {name:"Alexei Kovalev",pos:"F",sub:"RW",rating:84},
+    {name:"Sergei Krivokrasov",pos:"F",sub:"LW",rating:76},
+    {name:"Valeri Bure",pos:"F",sub:"RW",rating:79},
+    {name:"Igor Korolev",pos:"F",sub:"C",rating:74},
+    {name:"Vladimir Malakhov",pos:"D",sub:"LD",rating:83},
+    {name:"Darius Kasparaitis",pos:"D",sub:"RD",rating:80},
+    {name:"Sergei Zubov",pos:"D",sub:"RD",rating:85},
+    {name:"Igor Kravchuk",pos:"D",sub:"LD",rating:79},
+    {name:"Alexei Zhitnik",pos:"D",sub:"LD",rating:81},
+    {name:"Boris Mironov",pos:"D",sub:"RD",rating:78},
+    {name:"Nikolai Khabibulin",pos:"G",sub:"G",rating:86},
+    {name:"Mikhail Shtalenkov",pos:"G",sub:"G",rating:78},
+  ]},
+  "Sweden 1994":{flag:"🇸🇪",nation:"Sweden",players:[
+    {name:"Peter Forsberg",pos:"F",sub:"C",rating:94},
+    {name:"Mats Sundin",pos:"F",sub:"C",rating:91},
+    {name:"Markus Naslund",pos:"F",sub:"LW",rating:83},
+    {name:"Tomas Sandstrom",pos:"F",sub:"RW",rating:80},
+    {name:"Hakan Loob",pos:"F",sub:"RW",rating:83},
+    {name:"Roger Johansson",pos:"F",sub:"LW",rating:76},
+    {name:"Mikael Nylander",pos:"F",sub:"C",rating:79},
+    {name:"Peter Andersson",pos:"F",sub:"LW",rating:75},
+    {name:"Andreas Johansson",pos:"F",sub:"C",rating:76},
+    {name:"Patrik Carnback",pos:"F",sub:"LW",rating:74},
+    {name:"Charles Berglund",pos:"F",sub:"C",rating:73},
+    {name:"Roger Akerstrom",pos:"F",sub:"RW",rating:72},
+    {name:"Nicklas Lidstrom",pos:"D",sub:"RD",rating:92},
+    {name:"Borje Salming",pos:"D",sub:"LD",rating:84},
+    {name:"Tommy Albelin",pos:"D",sub:"LD",rating:78},
+    {name:"Kjell Samuelsson",pos:"D",sub:"RD",rating:79},
+    {name:"Fredrik Stillman",pos:"D",sub:"LD",rating:76},
+    {name:"Calle Johansson",pos:"D",sub:"RD",rating:78},
+    {name:"Tommy Salo",pos:"G",sub:"G",rating:82},
+    {name:"Pelle Lindbergh",pos:"G",sub:"G",rating:79},
+  ]},
+  "Finland 1998":{flag:"🇫🇮",nation:"Finland",players:[
+    {name:"Teemu Selanne",pos:"F",sub:"RW",rating:94},
+    {name:"Saku Koivu",pos:"F",sub:"C",rating:87},
+    {name:"Jere Lehtinen",pos:"F",sub:"RW",rating:85},
+    {name:"Ville Peltonen",pos:"F",sub:"LW",rating:79},
+    {name:"Raimo Helminen",pos:"F",sub:"C",rating:77},
+    {name:"Jyrki Lumme",pos:"F",sub:"LW",rating:76},
+    {name:"Juha Ylonen",pos:"F",sub:"C",rating:76},
+    {name:"Antti Tormanen",pos:"F",sub:"RW",rating:75},
+    {name:"Mika Nieminen",pos:"F",sub:"LW",rating:74},
+    {name:"Rauli Raitanen",pos:"F",sub:"C",rating:72},
+    {name:"Christian Ruuttu",pos:"F",sub:"C",rating:77},
+    {name:"Jukka Tammi",pos:"F",sub:"RW",rating:71},
+    {name:"Kimmo Timonen",pos:"D",sub:"RD",rating:85},
+    {name:"Jyrki Lumme",pos:"D",sub:"LD",rating:78},
+    {name:"Petteri Nummelin",pos:"D",sub:"LD",rating:78},
+    {name:"Pasi Sormunen",pos:"D",sub:"RD",rating:74},
+    {name:"Timo Jutila",pos:"D",sub:"LD",rating:78},
+    {name:"Janne Niinimaa",pos:"D",sub:"RD",rating:79},
+    {name:"Jarmo Myllys",pos:"G",sub:"G",rating:80},
+    {name:"Pasi Nurminen",pos:"G",sub:"G",rating:76},
+  ]},
+  "Belarus 2002":{flag:"🇧🇾",nation:"Belarus",players:[
+    {name:"Ruslan Salei",pos:"D",sub:"LD",rating:82},
+    {name:"Vladimir Kopat",pos:"D",sub:"RD",rating:74},
+    {name:"Andrei Skopintsev",pos:"D",sub:"LD",rating:72},
+    {name:"Oleg Antonenko",pos:"F",sub:"LW",rating:76},
+    {name:"Alexei Kalyuzhny",pos:"F",sub:"C",rating:74},
+    {name:"Sergei Stas",pos:"F",sub:"RW",rating:72},
+    {name:"Andrei Kovalev",pos:"F",sub:"LW",rating:73},
+    {name:"Vladimir Tsyplakov",pos:"F",sub:"LW",rating:74},
+    {name:"Alexei Kudashov",pos:"F",sub:"C",rating:72},
+    {name:"Andrei Rasolko",pos:"F",sub:"C",rating:70},
+    {name:"Vasily Pankov",pos:"F",sub:"RW",rating:69},
+    {name:"Dmitri Khristich",pos:"F",sub:"RW",rating:74},
+    {name:"Alexander Alexeyev",pos:"D",sub:"RD",rating:71},
+    {name:"Dmitri Stetsenko",pos:"D",sub:"LD",rating:70},
+    {name:"Sergei Sushko",pos:"D",sub:"RD",rating:69},
+    {name:"Vladimir Volkov",pos:"D",sub:"LD",rating:69},
+    {name:"Alexander Makritsky",pos:"D",sub:"RD",rating:68},
+    {name:"Yuri Leonov",pos:"D",sub:"LD",rating:68},
+    {name:"Andrei Mezin",pos:"G",sub:"G",rating:80},
+    {name:"Viktor Karachun",pos:"G",sub:"G",rating:70},
+  ]},
+  "Belarus 2010":{flag:"🇧🇾",nation:"Belarus",players:[
+    {name:"Mikhail Grabovski",pos:"F",sub:"C",rating:80},
+    {name:"Andrei Kostitsyn",pos:"F",sub:"LW",rating:79},
+    {name:"Sergei Kostitsyn",pos:"F",sub:"RW",rating:77},
+    {name:"Dmitri Meleshko",pos:"F",sub:"LW",rating:75},
+    {name:"Alexei Kalyuzhny",pos:"F",sub:"C",rating:76},
+    {name:"Alexander Ryadinsky",pos:"F",sub:"C",rating:71},
+    {name:"Sergei Drozd",pos:"F",sub:"RW",rating:70},
+    {name:"Oleg Antonenko",pos:"F",sub:"LW",rating:72},
+    {name:"Maxim Sushko",pos:"F",sub:"RW",rating:70},
+    {name:"Dmitri Korobov",pos:"F",sub:"C",rating:69},
+    {name:"Alexander Kulakov",pos:"F",sub:"LW",rating:69},
+    {name:"Alexander Zhidkikh",pos:"F",sub:"RW",rating:68},
+    {name:"Ruslan Salei",pos:"D",sub:"LD",rating:80},
+    {name:"Vladimir Denisov",pos:"D",sub:"RD",rating:73},
+    {name:"Sergei Zadelenov",pos:"D",sub:"LD",rating:70},
+    {name:"Nikolai Stasenko",pos:"D",sub:"RD",rating:69},
+    {name:"Andrei Skopintsev",pos:"D",sub:"LD",rating:70},
+    {name:"Alexander Makritsky",pos:"D",sub:"RD",rating:68},
+    {name:"Andrei Mezin",pos:"G",sub:"G",rating:78},
+    {name:"Kevin Lalande",pos:"G",sub:"G",rating:74},
+  ]},
+  "Belarus 2014":{flag:"🇧🇾",nation:"Belarus",players:[
+    {name:"Mikhail Grabovski",pos:"F",sub:"C",rating:81},
+    {name:"Andrei Kostitsyn",pos:"F",sub:"LW",rating:78},
+    {name:"Sergei Kostitsyn",pos:"F",sub:"RW",rating:76},
+    {name:"Evgeni Kovyrshin",pos:"F",sub:"C",rating:71},
+    {name:"Cory Conacher",pos:"F",sub:"RW",rating:73},
+    {name:"Nikolai Stasenko",pos:"F",sub:"LW",rating:70},
+    {name:"Alexander Kitarov",pos:"F",sub:"C",rating:69},
+    {name:"Alexei Kalyuzhny",pos:"F",sub:"C",rating:73},
+    {name:"Igor Makarov",pos:"F",sub:"LW",rating:69},
+    {name:"Alexander Pavlovich",pos:"F",sub:"RW",rating:68},
+    {name:"Alexander Kulakov",pos:"F",sub:"LW",rating:70},
+    {name:"Dmitri Meleshko",pos:"F",sub:"RW",rating:72},
+    {name:"Dmitri Korobov",pos:"D",sub:"RD",rating:74},
+    {name:"Andrei Stas",pos:"D",sub:"LD",rating:72},
+    {name:"Sergei Zadelenov",pos:"D",sub:"RD",rating:69},
+    {name:"Artem Demkov",pos:"D",sub:"LD",rating:69},
+    {name:"Denis Shafranov",pos:"D",sub:"RD",rating:68},
+    {name:"Nikolai Stasenko",pos:"D",sub:"LD",rating:69},
+    {name:"Kevin Lalande",pos:"G",sub:"G",rating:76},
+    {name:"Vitali Koval",pos:"G",sub:"G",rating:71},
+  ]},
+  "Belarus 2018":{flag:"🇧🇾",nation:"Belarus",players:[
+    {name:"Yegor Sharangovich",pos:"F",sub:"C",rating:76},
+    {name:"Dmitry Buinitsky",pos:"F",sub:"LW",rating:72},
+    {name:"Artyom Demkov",pos:"F",sub:"RW",rating:70},
+    {name:"Mikhail Stefanovich",pos:"F",sub:"C",rating:69},
+    {name:"Oleg Evenko",pos:"F",sub:"LW",rating:68},
+    {name:"Linus Videll",pos:"F",sub:"RW",rating:67},
+    {name:"Geoff Platt",pos:"F",sub:"C",rating:72},
+    {name:"Denis Korobov",pos:"F",sub:"RW",rating:67},
+    {name:"Dmitry Kovalenko",pos:"F",sub:"LW",rating:66},
+    {name:"Roman Grachyov",pos:"F",sub:"C",rating:66},
+    {name:"Andrei Antonov",pos:"F",sub:"LW",rating:65},
+    {name:"Alexander Pavlovich",pos:"F",sub:"RW",rating:66},
+    {name:"Vladislav Kodola",pos:"D",sub:"LD",rating:71},
+    {name:"Ilya Usau",pos:"D",sub:"RD",rating:70},
+    {name:"Andrei Stas",pos:"D",sub:"LD",rating:69},
+    {name:"Ivan Usenko",pos:"D",sub:"RD",rating:67},
+    {name:"Denis Shafranov",pos:"D",sub:"LD",rating:66},
+    {name:"Alexander Materukhin",pos:"D",sub:"RD",rating:65},
+    {name:"Nikita Ustinenko",pos:"G",sub:"G",rating:74},
+    {name:"Alexei Kolosov",pos:"G",sub:"G",rating:72},
+  ]},
+  "Kazakhstan 1998":{flag:"🇰🇿",nation:"Kazakhstan",players:[
+    {name:"Yevgeni Koreshkov",pos:"F",sub:"RW",rating:76},
+    {name:"Vitali Eremeyev",pos:"F",sub:"C",rating:74},
+    {name:"Oleg Kovalenko",pos:"F",sub:"LW",rating:73},
+    {name:"Nikolai Antropov",pos:"F",sub:"C",rating:72},
+    {name:"Alexander Koreshkov",pos:"F",sub:"LW",rating:70},
+    {name:"Vadim Glovatski",pos:"F",sub:"RW",rating:68},
+    {name:"Andrei Trakhanov",pos:"F",sub:"C",rating:68},
+    {name:"Maxim Bets",pos:"F",sub:"LW",rating:67},
+    {name:"Evgeni Ryabchikov",pos:"F",sub:"RW",rating:67},
+    {name:"Sergei Kharitonov",pos:"F",sub:"C",rating:66},
+    {name:"Oleg Grosev",pos:"F",sub:"LW",rating:66},
+    {name:"Alexandr Karpov",pos:"F",sub:"C",rating:67},
+    {name:"Sergei Mogilnikov",pos:"D",sub:"LD",rating:71},
+    {name:"Andrei Sokolov",pos:"D",sub:"RD",rating:70},
+    {name:"Vadim Shaidullin",pos:"D",sub:"LD",rating:68},
+    {name:"Alexander Semyonov",pos:"D",sub:"RD",rating:67},
+    {name:"Konstantin Shafranov",pos:"D",sub:"LD",rating:67},
+    {name:"Yuri Khmylev",pos:"D",sub:"RD",rating:66},
+    {name:"Vitali Yeremeyev",pos:"G",sub:"G",rating:73},
+    {name:"Sergei Zvyagin",pos:"G",sub:"G",rating:70},
+  ]},
+  "Kazakhstan 2022":{flag:"🇰🇿",nation:"Kazakhstan",players:[
+    {name:"Darren Dietz",pos:"D",sub:"RD",rating:76},
+    {name:"Alexei Maklyukov",pos:"F",sub:"C",rating:72},
+    {name:"Nikita Mikhailov",pos:"F",sub:"LW",rating:71},
+    {name:"Yan Semenov",pos:"F",sub:"C",rating:70},
+    {name:"Andrei Shukayev",pos:"F",sub:"RW",rating:70},
+    {name:"Mikhail Rakitin",pos:"F",sub:"LW",rating:69},
+    {name:"Nikolai Lemtyugov",pos:"F",sub:"C",rating:68},
+    {name:"Dmitri Shevchenko",pos:"F",sub:"RW",rating:68},
+    {name:"Roman Starchenko",pos:"F",sub:"LW",rating:67},
+    {name:"Yevgeni Rymarev",pos:"F",sub:"C",rating:67},
+    {name:"Pavel Akolzin",pos:"F",sub:"RW",rating:66},
+    {name:"Maxim Semyonov",pos:"F",sub:"LW",rating:66},
+    {name:"Dmitri Zagumyonnov",pos:"D",sub:"LD",rating:71},
+    {name:"Dmitri Vishnevski",pos:"D",sub:"LD",rating:68},
+    {name:"Yegor Petukhov",pos:"D",sub:"RD",rating:67},
+    {name:"Daniil Semyonov",pos:"D",sub:"RD",rating:66},
+    {name:"Ilya Usov",pos:"D",sub:"LD",rating:65},
+    {name:"Alexei Ilin",pos:"D",sub:"RD",rating:65},
+    {name:"Nikita Boyarkin",pos:"G",sub:"G",rating:74},
+    {name:"Andrei Guskov",pos:"G",sub:"G",rating:70},
+  ]},
+  "Norway 1994":{flag:"🇳🇴",nation:"Norway",players:[
+    {name:"Espen Knutsen",pos:"F",sub:"C",rating:75},
+    {name:"Jim Martinsen",pos:"F",sub:"RW",rating:71},
+    {name:"Per-Age Skroder",pos:"F",sub:"LW",rating:70},
+    {name:"Tommy Jakobsen",pos:"F",sub:"C",rating:69},
+    {name:"Petter Salsten",pos:"F",sub:"LW",rating:68},
+    {name:"Jan Roar Fagerli",pos:"F",sub:"RW",rating:67},
+    {name:"Trond Magnussen",pos:"F",sub:"C",rating:67},
+    {name:"Kurt Lysenstoen",pos:"F",sub:"LW",rating:66},
+    {name:"Cato Andersen",pos:"F",sub:"RW",rating:65},
+    {name:"Marius Rath",pos:"F",sub:"C",rating:65},
+    {name:"Tom Rowe",pos:"F",sub:"LW",rating:65},
+    {name:"Morten Finstad",pos:"F",sub:"RW",rating:64},
+    {name:"Ole Eskild Dahlstrom",pos:"D",sub:"LD",rating:70},
+    {name:"Tommy Jakobsen",pos:"D",sub:"RD",rating:70},
+    {name:"Bjorn Skaare",pos:"D",sub:"LD",rating:67},
+    {name:"Vidar Bjorn",pos:"D",sub:"RD",rating:66},
+    {name:"Ivar Formo",pos:"D",sub:"LD",rating:65},
+    {name:"Lars Erik Spets",pos:"D",sub:"RD",rating:66},
+    {name:"Robert Schistad",pos:"G",sub:"G",rating:72},
+    {name:"Pal Johnsen",pos:"G",sub:"G",rating:69},
+  ]},
+  "Norway 2010":{flag:"🇳🇴",nation:"Norway",players:[
+    {name:"Mats Zuccarello",pos:"F",sub:"RW",rating:81},
+    {name:"Patrick Thoresen",pos:"F",sub:"LW",rating:78},
+    {name:"Espen Knutsen",pos:"F",sub:"C",rating:73},
+    {name:"Lars Erik Spets",pos:"F",sub:"C",rating:71},
+    {name:"Tore Vikingstad",pos:"F",sub:"LW",rating:70},
+    {name:"Andreas Martinsen",pos:"F",sub:"LW",rating:70},
+    {name:"Per-Age Skroder",pos:"F",sub:"LW",rating:68},
+    {name:"Kristian Forsberg",pos:"F",sub:"RW",rating:68},
+    {name:"Mats Trygg",pos:"F",sub:"C",rating:67},
+    {name:"Thomas Nording",pos:"F",sub:"RW",rating:67},
+    {name:"Mads Hansen",pos:"F",sub:"C",rating:66},
+    {name:"Ken Andre Olimb",pos:"F",sub:"LW",rating:68},
+    {name:"Jonas Holos",pos:"D",sub:"RD",rating:73},
+    {name:"Henrik Isdahl",pos:"D",sub:"LD",rating:70},
+    {name:"Marius Holtet",pos:"D",sub:"LD",rating:68},
+    {name:"Tom Kristian Haugen",pos:"D",sub:"RD",rating:67},
+    {name:"Bard Ylvisaker",pos:"D",sub:"LD",rating:66},
+    {name:"Per Ingvald Hasselberg",pos:"D",sub:"RD",rating:65},
+    {name:"Pal Grotnes",pos:"G",sub:"G",rating:73},
+    {name:"Ruben Smith",pos:"G",sub:"G",rating:70},
+  ]},
+  "Norway 2022":{flag:"🇳🇴",nation:"Norway",players:[
+    {name:"Mats Zuccarello",pos:"F",sub:"RW",rating:84},
+    {name:"Henrik Borgstrom",pos:"F",sub:"C",rating:77},
+    {name:"Thomas Valkvae Olsen",pos:"F",sub:"LW",rating:72},
+    {name:"Andreas Martinsen",pos:"F",sub:"LW",rating:74},
+    {name:"Ken Andre Olimb",pos:"F",sub:"LW",rating:72},
+    {name:"Mathis Olimb",pos:"F",sub:"C",rating:71},
+    {name:"Patrick Thoresen",pos:"F",sub:"LW",rating:73},
+    {name:"Tobias Lindstrom",pos:"F",sub:"RW",rating:70},
+    {name:"Eirik Salsten",pos:"F",sub:"RW",rating:69},
+    {name:"Marcus Johansson",pos:"F",sub:"C",rating:75},
+    {name:"Per-Age Skroder",pos:"F",sub:"RW",rating:69},
+    {name:"Anders Bastiansen",pos:"F",sub:"C",rating:68},
+    {name:"Jonas Holos",pos:"D",sub:"RD",rating:74},
+    {name:"Alexander Bonsaksen",pos:"D",sub:"LD",rating:71},
+    {name:"Tobias Eger",pos:"D",sub:"RD",rating:69},
+    {name:"Mattias Norgaard",pos:"D",sub:"LD",rating:68},
+    {name:"Jonas Fjastad",pos:"D",sub:"LD",rating:67},
+    {name:"Fredrick Olofsson",pos:"D",sub:"RD",rating:67},
+    {name:"Henrik Haukeland",pos:"G",sub:"G",rating:76},
+    {name:"Lars Haugen",pos:"G",sub:"G",rating:74},
+  ]},
+  "France 2026":{flag:"🇫🇷",nation:"France",players:[
+    {name:"Pierre-Edouard Bellemare",pos:"F",sub:"C",rating:78},
+    {name:"Alexandre Texier",pos:"F",sub:"C",rating:80},
+    {name:"Stephane Da Costa",pos:"F",sub:"C",rating:76},
+    {name:"Tim Bozon",pos:"F",sub:"LW",rating:74},
+    {name:"Damien Fleury",pos:"F",sub:"LW",rating:73},
+    {name:"Kenny Agostino",pos:"F",sub:"RW",rating:73},
+    {name:"Sacha Treille",pos:"F",sub:"RW",rating:71},
+    {name:"Nicolas Deschamps",pos:"F",sub:"C",rating:70},
+    {name:"Antoine Roussel",pos:"F",sub:"LW",rating:75},
+    {name:"Laurent Meunier",pos:"F",sub:"RW",rating:70},
+    {name:"Jonathan Janil",pos:"F",sub:"C",rating:69},
+    {name:"Valentin Claireaux",pos:"F",sub:"LW",rating:69},
+    {name:"Yohann Auvitu",pos:"D",sub:"RD",rating:78},
+    {name:"Florian Chakiachvili",pos:"D",sub:"LD",rating:74},
+    {name:"Brian Flynn",pos:"F",sub:"RW",rating:72},
+    {name:"Romain Loeffel",pos:"D",sub:"LD",rating:72},
+    {name:"Stefan Da Costa",pos:"D",sub:"RD",rating:71},
+    {name:"Baptiste Amar",pos:"D",sub:"LD",rating:70},
+    {name:"Quentin Papillon",pos:"G",sub:"G",rating:73},
+    {name:"Jakub Stepanek",pos:"G",sub:"G",rating:71},
+  ]},
+  "Soviet Union 1980":{flag:"☭",nation:"Soviet Union",players:[
+    {name:"Vladislav Tretiak",pos:"G",sub:"G",rating:99},
+    {name:"Vladimir Myshkin",pos:"G",sub:"G",rating:85},
+    {name:"Valeri Kharlamov",pos:"F",sub:"LW",rating:97},
+    {name:"Sergei Makarov",pos:"F",sub:"RW",rating:93},
+    {name:"Vladimir Krutov",pos:"F",sub:"LW",rating:91},
+    {name:"Boris Mikhailov",pos:"F",sub:"RW",rating:90},
+    {name:"Vladimir Petrov",pos:"F",sub:"C",rating:89},
+    {name:"Helmuts Balderis",pos:"F",sub:"RW",rating:88},
+    {name:"Alexander Maltsev",pos:"F",sub:"C",rating:87},
+    {name:"Viktor Zhluktov",pos:"F",sub:"C",rating:83},
+    {name:"Alexander Skvortsov",pos:"F",sub:"LW",rating:81},
+    {name:"Aleksandr Golikov",pos:"F",sub:"RW",rating:80},
+    {name:"Vyacheslav Fetisov",pos:"D",sub:"LD",rating:94},
+    {name:"Alexei Kasatonov",pos:"D",sub:"RD",rating:87},
+    {name:"Valeri Vasiliev",pos:"D",sub:"RD",rating:85},
+    {name:"Vasily Pervukhin",pos:"D",sub:"LD",rating:81},
+    {name:"Sergei Starikov",pos:"D",sub:"RD",rating:79},
+    {name:"Zinetula Bilyaletdinov",pos:"D",sub:"LD",rating:78},
+    {name:"Vladimir Lutchenko",pos:"D",sub:"RD",rating:77},
+    {name:"Yuri Lyapkin",pos:"D",sub:"LD",rating:76},
+  ]},
+  "USA 1980":{flag:"🇺🇸",nation:"USA",players:[
+    {name:"Jim Craig",pos:"G",sub:"G",rating:86},
+    {name:"Steve Janaszak",pos:"G",sub:"G",rating:73},
+    {name:"Mark Johnson",pos:"F",sub:"C",rating:84},
+    {name:"Neal Broten",pos:"F",sub:"C",rating:82},
+    {name:"Mike Eruzione",pos:"F",sub:"LW",rating:78},
+    {name:"Mark Pavelich",pos:"F",sub:"C",rating:80},
+    {name:"Buzz Schneider",pos:"F",sub:"LW",rating:77},
+    {name:"Rob McClanahan",pos:"F",sub:"LW",rating:76},
+    {name:"Steve Christoff",pos:"F",sub:"RW",rating:75},
+    {name:"John Harrington",pos:"F",sub:"RW",rating:74},
+    {name:"Phil Verchota",pos:"F",sub:"LW",rating:73},
+    {name:"Dave Silk",pos:"F",sub:"RW",rating:74},
+    {name:"Dave Christian",pos:"D",sub:"RD",rating:79},
+    {name:"Ken Morrow",pos:"D",sub:"LD",rating:78},
+    {name:"Mike Ramsey",pos:"D",sub:"LD",rating:80},
+    {name:"Bill Baker",pos:"D",sub:"RD",rating:75},
+    {name:"Jack O'Callahan",pos:"D",sub:"RD",rating:74},
+    {name:"Bob Suter",pos:"D",sub:"LD",rating:73},
+    {name:"Gary Ross",pos:"F",sub:"C",rating:71},
+    {name:"Mark Wells",pos:"F",sub:"C",rating:72},
+  ]},
+  "Czechoslovakia 1980":{flag:"🇨🇿",nation:"Czechoslovakia",players:[
+    {name:"Jiri Kralik",pos:"G",sub:"G",rating:83},
+    {name:"Karel Lang",pos:"G",sub:"G",rating:78},
+    {name:"Milan Novy",pos:"F",sub:"C",rating:91},
+    {name:"Peter Stastny",pos:"F",sub:"C",rating:93},
+    {name:"Jaroslav Pouzar",pos:"F",sub:"LW",rating:89},
+    {name:"Anton Stastny",pos:"F",sub:"LW",rating:85},
+    {name:"Marian Stastny",pos:"F",sub:"RW",rating:84},
+    {name:"Ivan Hlinka",pos:"F",sub:"C",rating:87},
+    {name:"Vladimir Martinec",pos:"F",sub:"RW",rating:83},
+    {name:"Vincent Lukac",pos:"F",sub:"LW",rating:82},
+    {name:"Miroslav Frycer",pos:"F",sub:"RW",rating:80},
+    {name:"Dusan Pasek",pos:"F",sub:"C",rating:79},
+    {name:"Milan Chalupa",pos:"D",sub:"RD",rating:81},
+    {name:"Frantisek Kaberle",pos:"D",sub:"LD",rating:80},
+    {name:"Miroslav Dvorak",pos:"D",sub:"LD",rating:82},
+    {name:"Jiri Bubla",pos:"D",sub:"RD",rating:79},
+    {name:"Arnold Kadlec",pos:"D",sub:"LD",rating:77},
+    {name:"Jan Neliba",pos:"D",sub:"RD",rating:76},
+    {name:"Frantisek Pospisil",pos:"D",sub:"LD",rating:76},
+    {name:"Oldrich Machac",pos:"F",sub:"C",rating:76},
+  ]},
+  "Sweden 1980":{flag:"🇸🇪",nation:"Sweden",players:[
+    {name:"Pelle Lindbergh",pos:"G",sub:"G",rating:85},
+    {name:"William Lofqvist",pos:"G",sub:"G",rating:75},
+    {name:"Thomas Gradin",pos:"F",sub:"C",rating:86},
+    {name:"Per-Olov Brasar",pos:"F",sub:"LW",rating:82},
+    {name:"Mats Waltin",pos:"F",sub:"RW",rating:79},
+    {name:"Hakan Eriksson",pos:"F",sub:"C",rating:78},
+    {name:"Dan Labraaten",pos:"F",sub:"LW",rating:77},
+    {name:"Willy Lindstrom",pos:"F",sub:"RW",rating:80},
+    {name:"Tomas Eriksson",pos:"F",sub:"C",rating:76},
+    {name:"Harald Luckner",pos:"F",sub:"LW",rating:75},
+    {name:"Leif Holmgren",pos:"F",sub:"RW",rating:76},
+    {name:"Lars Lindgren",pos:"F",sub:"C",rating:74},
+    {name:"Borje Salming",pos:"D",sub:"LD",rating:91},
+    {name:"Rolf Edberg",pos:"D",sub:"RD",rating:78},
+    {name:"Ulf Weinstock",pos:"D",sub:"LD",rating:75},
+    {name:"Mats Lindh",pos:"D",sub:"RD",rating:74},
+    {name:"Sture Andersson",pos:"D",sub:"LD",rating:73},
+    {name:"Lars Bystrom",pos:"D",sub:"RD",rating:73},
+    {name:"Mats Ahlberg",pos:"F",sub:"LW",rating:73},
+    {name:"Lennart Norberg",pos:"F",sub:"C",rating:72},
+  ]},
+  "Finland 1980":{flag:"🇫🇮",nation:"Finland",players:[
+    {name:"Jorma Valtonen",pos:"G",sub:"G",rating:78},
+    {name:"Antti Leppanen",pos:"G",sub:"G",rating:74},
+    {name:"Antero Leinonen",pos:"F",sub:"C",rating:80},
+    {name:"Juhani Tamminen",pos:"F",sub:"LW",rating:78},
+    {name:"Markku Hakulinen",pos:"F",sub:"RW",rating:76},
+    {name:"Esa Peltonen",pos:"F",sub:"LW",rating:75},
+    {name:"Pertti Lehtonen",pos:"F",sub:"C",rating:74},
+    {name:"Tapio Levo",pos:"F",sub:"RW",rating:74},
+    {name:"Hannu Haapalainen",pos:"F",sub:"C",rating:73},
+    {name:"Mikko Leinonen",pos:"F",sub:"LW",rating:73},
+    {name:"Hannu Oksanen",pos:"F",sub:"C",rating:72},
+    {name:"Seppo Suoraniemi",pos:"F",sub:"RW",rating:71},
+    {name:"Reijo Ruotsalainen",pos:"D",sub:"RD",rating:83},
+    {name:"Pekka Rautakallio",pos:"D",sub:"LD",rating:79},
+    {name:"Lasse Litma",pos:"D",sub:"LD",rating:76},
+    {name:"Kari Makkonen",pos:"D",sub:"RD",rating:74},
+    {name:"Hannu Koskinen",pos:"D",sub:"LD",rating:73},
+    {name:"Timo Nummelin",pos:"D",sub:"RD",rating:72},
+    {name:"Jukka Koskilahti",pos:"D",sub:"LD",rating:72},
+    {name:"Pertti Valkeajarvi",pos:"D",sub:"RD",rating:71},
+  ]},
+  "Canada 1980":{flag:"🇨🇦",nation:"Canada",players:[
+    {name:"Glenn Anderson",pos:"F",sub:"RW",rating:80},
+    {name:"Paul MacLean",pos:"F",sub:"LW",rating:75},
+    {name:"Kevin Maxwell",pos:"F",sub:"C",rating:76},
+    {name:"Jim Nill",pos:"F",sub:"RW",rating:74},
+    {name:"John Devaney",pos:"F",sub:"LW",rating:74},
+    {name:"Dan D'Alvise",pos:"F",sub:"RW",rating:73},
+    {name:"Brad Pirie",pos:"F",sub:"C",rating:72},
+    {name:"Dave Hindmarch",pos:"F",sub:"LW",rating:71},
+    {name:"Tim Watters",pos:"F",sub:"C",rating:71},
+    {name:"Don Wheldon",pos:"F",sub:"LW",rating:70},
+    {name:"Ron Davidson",pos:"F",sub:"RW",rating:70},
+    {name:"Terry O'Malley",pos:"F",sub:"C",rating:69},
+    {name:"Warren Anderson",pos:"D",sub:"LD",rating:73},
+    {name:"Randy Gregg",pos:"D",sub:"RD",rating:76},
+    {name:"Brad Pirie",pos:"D",sub:"LD",rating:72},
+    {name:"Joe Grant",pos:"D",sub:"LD",rating:72},
+    {name:"Don Spring",pos:"D",sub:"RD",rating:72},
+    {name:"Tim Watters",pos:"D",sub:"RD",rating:71},
+    {name:"Bob Dupuis",pos:"G",sub:"G",rating:74},
+    {name:"Paul Pageau",pos:"G",sub:"G",rating:72},
+  ]},
+  "West Germany 1980":{flag:"🇩🇪",nation:"West Germany",players:[
+    {name:"Erich Kuhnhackl",pos:"F",sub:"C",rating:84},
+    {name:"Ernst Kopf",pos:"F",sub:"LW",rating:76},
+    {name:"Ignaz Berndaner",pos:"F",sub:"RW",rating:73},
+    {name:"Karl Friesen",pos:"F",sub:"LW",rating:74},
+    {name:"Martin Wild",pos:"F",sub:"C",rating:73},
+    {name:"Horst-Peter Kretschmer",pos:"F",sub:"RW",rating:72},
+    {name:"Rainer Philipp",pos:"F",sub:"LW",rating:71},
+    {name:"Gerald Haab",pos:"F",sub:"C",rating:70},
+    {name:"Anton Hofherr",pos:"F",sub:"RW",rating:70},
+    {name:"Marcus Kuhl",pos:"F",sub:"LW",rating:69},
+    {name:"Hans Zach",pos:"F",sub:"C",rating:70},
+    {name:"Udo Kiessling",pos:"D",sub:"LD",rating:79},
+    {name:"Franz Reindl",pos:"D",sub:"RD",rating:77},
+    {name:"Joachim Reil",pos:"D",sub:"LD",rating:72},
+    {name:"Klaus Merk",pos:"D",sub:"RD",rating:71},
+    {name:"Harold Kreis",pos:"D",sub:"LD",rating:71},
+    {name:"Roy Roedger",pos:"D",sub:"RD",rating:70},
+    {name:"Klaus-Peter Schramm",pos:"D",sub:"LD",rating:69},
+    {name:"Sigmund Suttner",pos:"G",sub:"G",rating:76},
+    {name:"Karl-Heinz Friesen",pos:"G",sub:"G",rating:71},
+  ]},
+  "Poland 1980":{flag:"🇵🇱",nation:"Poland",players:[
+    {name:"Henryk Gruth",pos:"G",sub:"G",rating:74},
+    {name:"Mieczyslaw Jaskierski",pos:"G",sub:"G",rating:70},
+    {name:"Andrzej Iskrzycki",pos:"F",sub:"C",rating:73},
+    {name:"Wieslaw Jobczyk",pos:"F",sub:"LW",rating:71},
+    {name:"Bogdan Jonak",pos:"F",sub:"RW",rating:70},
+    {name:"Robert Goralczyk",pos:"F",sub:"C",rating:69},
+    {name:"Dariusz Garbocz",pos:"F",sub:"LW",rating:68},
+    {name:"Marek Stebnicki",pos:"F",sub:"RW",rating:68},
+    {name:"Leszek Jachna",pos:"F",sub:"C",rating:67},
+    {name:"Tadeusz Obloj",pos:"F",sub:"LW",rating:67},
+    {name:"Stefan Chowaniec",pos:"F",sub:"C",rating:70},
+    {name:"Wlodzimierz Olszewski",pos:"F",sub:"RW",rating:67},
+    {name:"Leszek Tokarz",pos:"D",sub:"LD",rating:70},
+    {name:"Andrzej Zaczek",pos:"D",sub:"RD",rating:70},
+    {name:"Andrzej Hanisz",pos:"D",sub:"LD",rating:68},
+    {name:"Henryk Pytel",pos:"D",sub:"RD",rating:67},
+    {name:"Krzysztof Podsiadlo",pos:"D",sub:"LD",rating:67},
+    {name:"Stanislaw Klocek",pos:"D",sub:"RD",rating:66},
+    {name:"Marek Cholewa",pos:"D",sub:"LD",rating:68},
+    {name:"Waldemar Klisiak",pos:"D",sub:"RD",rating:67},
+  ]},
+  "Romania 1980":{flag:"🇷🇴",nation:"Romania",players:[
+    {name:"Dumitru Axinte",pos:"F",sub:"C",rating:70},
+    {name:"Ion Ionita",pos:"F",sub:"LW",rating:68},
+    {name:"Gheorghe Hutu",pos:"F",sub:"RW",rating:67},
+    {name:"Marian Marica",pos:"F",sub:"LW",rating:66},
+    {name:"Traian Cazacu",pos:"F",sub:"C",rating:66},
+    {name:"Alexandru Halauca",pos:"D",sub:"LD",rating:66},
+    {name:"Doru Tureanu",pos:"D",sub:"RD",rating:67},
+    {name:"Ion Berdila",pos:"F",sub:"RW",rating:65},
+    {name:"Mihail Popescu",pos:"F",sub:"C",rating:65},
+    {name:"Liviu Popa",pos:"F",sub:"LW",rating:64},
+    {name:"Vasile Bajnoczki",pos:"F",sub:"RW",rating:64},
+    {name:"Costinel Mazilu",pos:"F",sub:"C",rating:64},
+    {name:"Doru Morosanu",pos:"D",sub:"LD",rating:63},
+    {name:"Gheorghe Lupescu",pos:"D",sub:"RD",rating:63},
+    {name:"Sandor Gall",pos:"D",sub:"LD",rating:63},
+    {name:"Aurel Grepis",pos:"D",sub:"RD",rating:62},
+    {name:"Constantin Nistor",pos:"D",sub:"LD",rating:62},
+    {name:"Ioan Dobrescu",pos:"D",sub:"RD",rating:62},
+    {name:"Valerian Netedu",pos:"G",sub:"G",rating:69},
+    {name:"Marian Pisaru",pos:"G",sub:"G",rating:67},
+  ]},
+  "Netherlands 1980":{flag:"🇳🇱",nation:"Netherlands",players:[
+    {name:"Stan de Jong",pos:"F",sub:"C",rating:66},
+    {name:"Gerrit Noorman",pos:"F",sub:"LW",rating:64},
+    {name:"Willem Jansen",pos:"F",sub:"RW",rating:63},
+    {name:"Peter Faber",pos:"F",sub:"LW",rating:62},
+    {name:"Harry van der Weel",pos:"F",sub:"C",rating:62},
+    {name:"Leon Schut",pos:"F",sub:"RW",rating:61},
+    {name:"Henri Jansen",pos:"F",sub:"LW",rating:61},
+    {name:"Rein van Zanten",pos:"F",sub:"C",rating:61},
+    {name:"Jan de Boer",pos:"F",sub:"RW",rating:60},
+    {name:"Bart Douma",pos:"F",sub:"LW",rating:60},
+    {name:"Eric van Rooyen",pos:"F",sub:"C",rating:60},
+    {name:"Guus van Dooremalen",pos:"F",sub:"RW",rating:60},
+    {name:"Joris Kluivers",pos:"D",sub:"LD",rating:63},
+    {name:"Rob Demmers",pos:"D",sub:"RD",rating:62},
+    {name:"Peter van Breukelen",pos:"D",sub:"LD",rating:61},
+    {name:"Hans Zandee",pos:"D",sub:"RD",rating:60},
+    {name:"Bert Wouters",pos:"D",sub:"LD",rating:60},
+    {name:"Paul van Tongeren",pos:"D",sub:"RD",rating:60},
+    {name:"Tom de Goede",pos:"G",sub:"G",rating:65},
+    {name:"Eric Vooren",pos:"G",sub:"G",rating:63},
+  ]},
+  "Japan 1980":{flag:"🇯🇵",nation:"Japan",players:[
+    {name:"Hiroshi Ogasawara",pos:"F",sub:"C",rating:67},
+    {name:"Takao Noda",pos:"F",sub:"LW",rating:65},
+    {name:"Etsuo Yamawaki",pos:"F",sub:"RW",rating:64},
+    {name:"Tetsuo Sato",pos:"F",sub:"LW",rating:63},
+    {name:"Shinichi Ikeda",pos:"F",sub:"C",rating:63},
+    {name:"Mamoru Takahashi",pos:"F",sub:"RW",rating:62},
+    {name:"Tsutomu Hanzawa",pos:"F",sub:"C",rating:62},
+    {name:"Masahito Kato",pos:"F",sub:"LW",rating:61},
+    {name:"Hiroshi Suzuki",pos:"F",sub:"RW",rating:61},
+    {name:"Junichi Ohashi",pos:"F",sub:"C",rating:61},
+    {name:"Kazuya Sato",pos:"F",sub:"LW",rating:60},
+    {name:"Nobuyuki Sato",pos:"F",sub:"RW",rating:60},
+    {name:"Tatsuya Ikeda",pos:"D",sub:"LD",rating:63},
+    {name:"Kenichi Hayashi",pos:"D",sub:"RD",rating:62},
+    {name:"Fumio Iwata",pos:"D",sub:"LD",rating:61},
+    {name:"Yoshio Iizuka",pos:"D",sub:"RD",rating:61},
+    {name:"Ryuichi Kobayashi",pos:"D",sub:"LD",rating:60},
+    {name:"Tsuyoshi Honma",pos:"D",sub:"RD",rating:60},
+    {name:"Yoshiaki Nishikawa",pos:"G",sub:"G",rating:66},
+    {name:"Yoshio Fukuyama",pos:"G",sub:"G",rating:64},
+  ]},
+  "Soviet Union 1984":{flag:"☭",nation:"Soviet Union",players:[
+    {name:"Vladislav Tretiak",pos:"G",sub:"G",rating:98},
+    {name:"Vladimir Myshkin",pos:"G",sub:"G",rating:86},
+    {name:"Sergei Makarov",pos:"F",sub:"RW",rating:95},
+    {name:"Vladimir Krutov",pos:"F",sub:"LW",rating:93},
+    {name:"Igor Larionov",pos:"F",sub:"C",rating:93},
+    {name:"Alexander Kozhevnikov",pos:"F",sub:"RW",rating:86},
+    {name:"Sergei Shepelev",pos:"F",sub:"LW",rating:83},
+    {name:"Viktor Shalimov",pos:"F",sub:"C",rating:81},
+    {name:"Andrei Khomutov",pos:"F",sub:"RW",rating:84},
+    {name:"Nikolai Drozdetski",pos:"F",sub:"LW",rating:81},
+    {name:"Alexander Tyumenev",pos:"F",sub:"C",rating:79},
+    {name:"Mikhail Varnakov",pos:"F",sub:"LW",rating:78},
+    {name:"Vyacheslav Fetisov",pos:"D",sub:"LD",rating:95},
+    {name:"Alexei Kasatonov",pos:"D",sub:"RD",rating:89},
+    {name:"Sergei Starikov",pos:"D",sub:"RD",rating:83},
+    {name:"Vasily Pervukhin",pos:"D",sub:"LD",rating:82},
+    {name:"Zinetula Bilyaletdinov",pos:"D",sub:"LD",rating:80},
+    {name:"Igor Stelnov",pos:"D",sub:"RD",rating:79},
+    {name:"Alexei Gusarov",pos:"D",sub:"LD",rating:78},
+    {name:"Sergei Yashin",pos:"F",sub:"C",rating:79},
+  ]},
+  "Czechoslovakia 1984":{flag:"🇨🇿",nation:"Czechoslovakia",players:[
+    {name:"Jiri Kralik",pos:"G",sub:"G",rating:84},
+    {name:"Jan Neliba",pos:"G",sub:"G",rating:79},
+    {name:"Peter Stastny",pos:"F",sub:"C",rating:91},
+    {name:"Milan Novy",pos:"F",sub:"C",rating:87},
+    {name:"Darius Rusnak",pos:"F",sub:"RW",rating:83},
+    {name:"Frantisek Cernik",pos:"F",sub:"LW",rating:81},
+    {name:"Eduard Uvira",pos:"F",sub:"LW",rating:79},
+    {name:"Jiri Lala",pos:"F",sub:"C",rating:78},
+    {name:"Dusan Pasek",pos:"F",sub:"C",rating:79},
+    {name:"Vladimir Caldr",pos:"F",sub:"LW",rating:77},
+    {name:"Petr Rosol",pos:"F",sub:"RW",rating:78},
+    {name:"Radoslav Svoboda",pos:"F",sub:"C",rating:76},
+    {name:"Milan Chalupa",pos:"D",sub:"RD",rating:83},
+    {name:"Miloslav Horava",pos:"D",sub:"LD",rating:80},
+    {name:"Arnold Kadlec",pos:"D",sub:"LD",rating:78},
+    {name:"Frantisek Kucera",pos:"D",sub:"RD",rating:78},
+    {name:"Miroslav Dvorak",pos:"D",sub:"LD",rating:79},
+    {name:"Antonin Stavjana",pos:"D",sub:"RD",rating:77},
+    {name:"Pavel Richter",pos:"D",sub:"LD",rating:76},
+    {name:"Jaroslav Benak",pos:"F",sub:"RW",rating:75},
+  ]},
+  "Sweden 1984":{flag:"🇸🇪",nation:"Sweden",players:[
+    {name:"Pelle Lindbergh",pos:"G",sub:"G",rating:88},
+    {name:"Peter Lindmark",pos:"G",sub:"G",rating:79},
+    {name:"Mats Naslund",pos:"F",sub:"LW",rating:89},
+    {name:"Hakan Loob",pos:"F",sub:"RW",rating:87},
+    {name:"Thomas Steen",pos:"F",sub:"C",rating:85},
+    {name:"Tomas Sandstrom",pos:"F",sub:"RW",rating:84},
+    {name:"Thomas Gradin",pos:"F",sub:"C",rating:84},
+    {name:"Per-Olov Brasar",pos:"F",sub:"LW",rating:80},
+    {name:"Hans Lindberg",pos:"F",sub:"LW",rating:77},
+    {name:"Patrik Sundstrom",pos:"F",sub:"C",rating:81},
+    {name:"Lars Eriksson",pos:"F",sub:"LW",rating:76},
+    {name:"Tommy Morth",pos:"F",sub:"RW",rating:75},
+    {name:"Borje Salming",pos:"D",sub:"LD",rating:88},
+    {name:"Thomas Eriksson",pos:"D",sub:"RD",rating:80},
+    {name:"Tommy Albelin",pos:"D",sub:"RD",rating:78},
+    {name:"Peter Nilsson",pos:"D",sub:"LD",rating:77},
+    {name:"Mats Kihlstrom",pos:"D",sub:"LD",rating:76},
+    {name:"Jan Eriksson",pos:"D",sub:"RD",rating:75},
+    {name:"Hakan Sodergren",pos:"D",sub:"LD",rating:75},
+    {name:"Mikael Johansson",pos:"F",sub:"C",rating:74},
+  ]},
+  "Canada 1984":{flag:"🇨🇦",nation:"Canada",players:[
+    {name:"Pat Flatley",pos:"F",sub:"RW",rating:79},
+    {name:"Dave Gagner",pos:"F",sub:"C",rating:78},
+    {name:"Carey Wilson",pos:"F",sub:"C",rating:78},
+    {name:"Kirk Muller",pos:"F",sub:"LW",rating:81},
+    {name:"Dave Tippett",pos:"F",sub:"LW",rating:74},
+    {name:"Warren Luhning",pos:"F",sub:"RW",rating:73},
+    {name:"Dave Andreychuk",pos:"F",sub:"LW",rating:77},
+    {name:"Russ Courtnall",pos:"F",sub:"C",rating:76},
+    {name:"Terry Carkner",pos:"F",sub:"RW",rating:73},
+    {name:"Steve Tambellini",pos:"F",sub:"LW",rating:74},
+    {name:"Dan Wood",pos:"F",sub:"C",rating:72},
+    {name:"Grant Martin",pos:"F",sub:"RW",rating:71},
+    {name:"James Patrick",pos:"D",sub:"RD",rating:80},
+    {name:"Doug Lidster",pos:"D",sub:"LD",rating:77},
+    {name:"Craig Redmond",pos:"D",sub:"RD",rating:76},
+    {name:"Brad Shaw",pos:"D",sub:"LD",rating:75},
+    {name:"Darren Lowe",pos:"D",sub:"LD",rating:73},
+    {name:"Bruce Driver",pos:"D",sub:"RD",rating:76},
+    {name:"Mario Gosselin",pos:"G",sub:"G",rating:79},
+    {name:"Robin Bartel",pos:"G",sub:"G",rating:73},
+  ]},
+  "Finland 1984":{flag:"🇫🇮",nation:"Finland",players:[
+    {name:"Jari Kurri",pos:"F",sub:"RW",rating:91},
+    {name:"Raimo Summanen",pos:"F",sub:"C",rating:80},
+    {name:"Petri Skriko",pos:"F",sub:"RW",rating:81},
+    {name:"Esa Tikkanen",pos:"F",sub:"LW",rating:83},
+    {name:"Hannu Haapalainen",pos:"F",sub:"LW",rating:76},
+    {name:"Pekka Tuomisto",pos:"F",sub:"C",rating:74},
+    {name:"Timo Susi",pos:"F",sub:"RW",rating:73},
+    {name:"Anssi Melamets",pos:"F",sub:"LW",rating:73},
+    {name:"Timo Jutila",pos:"F",sub:"C",rating:76},
+    {name:"Hannu Virta",pos:"F",sub:"C",rating:75},
+    {name:"Kari Jalonen",pos:"F",sub:"LW",rating:74},
+    {name:"Jukka Seppo",pos:"F",sub:"RW",rating:72},
+    {name:"Reijo Ruotsalainen",pos:"D",sub:"RD",rating:85},
+    {name:"Risto Siltanen",pos:"D",sub:"LD",rating:82},
+    {name:"Pekka Rautakallio",pos:"D",sub:"LD",rating:78},
+    {name:"Simo Saarinen",pos:"D",sub:"RD",rating:75},
+    {name:"Kari Eloranta",pos:"D",sub:"LD",rating:74},
+    {name:"Timo Nummelin",pos:"D",sub:"RD",rating:74},
+    {name:"Jorma Valtonen",pos:"G",sub:"G",rating:79},
+    {name:"Anssi Melametsa",pos:"G",sub:"G",rating:76},
+  ]},
+  "West Germany 1984":{flag:"🇩🇪",nation:"West Germany",players:[
+    {name:"Erich Kuhnhackl",pos:"F",sub:"C",rating:86},
+    {name:"Ernst Kopf",pos:"F",sub:"LW",rating:76},
+    {name:"Karl Friesen",pos:"F",sub:"LW",rating:75},
+    {name:"Ignaz Berndaner",pos:"F",sub:"RW",rating:74},
+    {name:"Horst-Peter Kretschmer",pos:"F",sub:"RW",rating:73},
+    {name:"Martin Wild",pos:"F",sub:"C",rating:72},
+    {name:"Rainer Philipp",pos:"F",sub:"LW",rating:71},
+    {name:"Peter Obresa",pos:"F",sub:"C",rating:70},
+    {name:"Hans Zach",pos:"F",sub:"C",rating:71},
+    {name:"Joachim Himmer",pos:"F",sub:"RW",rating:70},
+    {name:"Josef Schickengruber",pos:"F",sub:"C",rating:73},
+    {name:"Bernd Truntschka",pos:"F",sub:"RW",rating:72},
+    {name:"Udo Kiessling",pos:"D",sub:"LD",rating:81},
+    {name:"Franz Reindl",pos:"D",sub:"RD",rating:79},
+    {name:"Roy Roedger",pos:"D",sub:"LD",rating:72},
+    {name:"Klaus Merk",pos:"D",sub:"RD",rating:71},
+    {name:"Harold Kreis",pos:"D",sub:"LD",rating:71},
+    {name:"Joachim Reil",pos:"D",sub:"RD",rating:70},
+    {name:"Sigmund Suttner",pos:"G",sub:"G",rating:77},
+    {name:"Peter Obresa",pos:"G",sub:"G",rating:74},
+  ]},
+  "Yugoslavia 1984":{flag:"🇾🇺",nation:"Yugoslavia",players:[
+    {name:"Edo Hafner",pos:"F",sub:"C",rating:72},
+    {name:"Zvone Suvak",pos:"F",sub:"LW",rating:71},
+    {name:"Marjan Gorenc",pos:"F",sub:"RW",rating:69},
+    {name:"Bojan Filipic",pos:"F",sub:"C",rating:68},
+    {name:"Milan Razinger",pos:"F",sub:"LW",rating:67},
+    {name:"Franc Smolej",pos:"F",sub:"RW",rating:67},
+    {name:"Milan Karpan",pos:"F",sub:"C",rating:66},
+    {name:"Igor Beribak",pos:"F",sub:"LW",rating:66},
+    {name:"Tomaz Vnuk",pos:"F",sub:"RW",rating:65},
+    {name:"Drago Mlinaric",pos:"F",sub:"C",rating:65},
+    {name:"Matjaz Kopitar",pos:"F",sub:"LW",rating:66},
+    {name:"Slavko Krajnc",pos:"F",sub:"RW",rating:64},
+    {name:"Ervin Hren",pos:"D",sub:"LD",rating:68},
+    {name:"Franc Smolej",pos:"D",sub:"RD",rating:67},
+    {name:"Andrej Hiti",pos:"D",sub:"LD",rating:66},
+    {name:"Robert Ciglenecki",pos:"D",sub:"RD",rating:65},
+    {name:"Zdravko Pavlin",pos:"D",sub:"LD",rating:64},
+    {name:"Janko Skubic",pos:"D",sub:"RD",rating:64},
+    {name:"Vitja Orehek",pos:"G",sub:"G",rating:70},
+    {name:"Anton Gale",pos:"G",sub:"G",rating:67},
+  ]},
+  "Austria 1984":{flag:"🇦🇹",nation:"Austria",players:[
+    {name:"Herbert Hohenberger",pos:"F",sub:"C",rating:73},
+    {name:"Ronald Puff",pos:"F",sub:"LW",rating:70},
+    {name:"Hans Reiland",pos:"F",sub:"RW",rating:68},
+    {name:"Gerald Ressmann",pos:"F",sub:"C",rating:67},
+    {name:"Kurt Harand",pos:"F",sub:"LW",rating:67},
+    {name:"Werner Kerth",pos:"F",sub:"RW",rating:66},
+    {name:"Franz Gruber",pos:"F",sub:"C",rating:66},
+    {name:"Thomas Cijan",pos:"F",sub:"LW",rating:65},
+    {name:"Franz Schilcher",pos:"F",sub:"RW",rating:65},
+    {name:"Johann Spurny",pos:"F",sub:"C",rating:65},
+    {name:"Rudolf Posch",pos:"F",sub:"LW",rating:64},
+    {name:"Manfred Muhr",pos:"F",sub:"RW",rating:64},
+    {name:"Dieter Kalt",pos:"D",sub:"LD",rating:70},
+    {name:"Michael Shea",pos:"D",sub:"RD",rating:69},
+    {name:"Reinhard Koll",pos:"D",sub:"LD",rating:67},
+    {name:"Christoph Brandner",pos:"D",sub:"RD",rating:66},
+    {name:"Werner Kerth",pos:"D",sub:"LD",rating:65},
+    {name:"Robert Oberarzbacher",pos:"D",sub:"RD",rating:64},
+    {name:"Georg Holzmann",pos:"G",sub:"G",rating:71},
+    {name:"Karl Heinz Schibaum",pos:"G",sub:"G",rating:68},
+  ]},
+  "Poland 1984":{flag:"🇵🇱",nation:"Poland",players:[
+    {name:"Henryk Gruth",pos:"G",sub:"G",rating:75},
+    {name:"Marek Cholewa",pos:"G",sub:"G",rating:71},
+    {name:"Andrzej Iskrzycki",pos:"F",sub:"C",rating:73},
+    {name:"Wieslaw Jobczyk",pos:"F",sub:"LW",rating:71},
+    {name:"Janusz Adamiec",pos:"F",sub:"RW",rating:69},
+    {name:"Dariusz Garbocz",pos:"F",sub:"LW",rating:68},
+    {name:"Stefan Chowaniec",pos:"F",sub:"C",rating:70},
+    {name:"Marek Stebnicki",pos:"F",sub:"RW",rating:67},
+    {name:"Leszek Jachna",pos:"F",sub:"C",rating:66},
+    {name:"Tadeusz Obloj",pos:"F",sub:"LW",rating:66},
+    {name:"Wlodzimierz Olszewski",pos:"F",sub:"RW",rating:65},
+    {name:"Mieczyslaw Jaskierski",pos:"F",sub:"C",rating:68},
+    {name:"Leszek Tokarz",pos:"D",sub:"LD",rating:70},
+    {name:"Andrzej Zaczek",pos:"D",sub:"RD",rating:70},
+    {name:"Andrzej Hanisz",pos:"D",sub:"LD",rating:68},
+    {name:"Henryk Pytel",pos:"D",sub:"RD",rating:67},
+    {name:"Krzysztof Podsiadlo",pos:"D",sub:"LD",rating:66},
+    {name:"Stanislaw Klocek",pos:"D",sub:"RD",rating:66},
+    {name:"Waldemar Klisiak",pos:"D",sub:"LD",rating:68},
+    {name:"Kazimierz Podsiadlo",pos:"D",sub:"RD",rating:65},
+  ]},
+  "Soviet Union 1988":{flag:"☭",nation:"Soviet Union",players:[
+    {name:"Sergei Makarov",pos:"F",sub:"RW",rating:96},
+    {name:"Vladimir Krutov",pos:"F",sub:"LW",rating:94},
+    {name:"Igor Larionov",pos:"F",sub:"C",rating:94},
+    {name:"Valeri Kamensky",pos:"F",sub:"LW",rating:88},
+    {name:"Andrei Lomakin",pos:"F",sub:"C",rating:83},
+    {name:"Sergei Yashin",pos:"F",sub:"C",rating:82},
+    {name:"Evgeni Davydov",pos:"F",sub:"LW",rating:83},
+    {name:"Andrei Khomutov",pos:"F",sub:"RW",rating:84},
+    {name:"Alexander Kozhevnikov",pos:"F",sub:"RW",rating:83},
+    {name:"Mikhail Varnakov",pos:"F",sub:"LW",rating:79},
+    {name:"Igor Stelnov",pos:"F",sub:"C",rating:78},
+    {name:"Alexei Gusarov",pos:"F",sub:"C",rating:79},
+    {name:"Vyacheslav Fetisov",pos:"D",sub:"LD",rating:96},
+    {name:"Alexei Kasatonov",pos:"D",sub:"RD",rating:90},
+    {name:"Igor Kravchuk",pos:"D",sub:"LD",rating:82},
+    {name:"Sergei Starikov",pos:"D",sub:"RD",rating:81},
+    {name:"Sergei Mylnikov",pos:"G",sub:"G",rating:84},
+    {name:"Evgeni Belosheikin",pos:"G",sub:"G",rating:85},
+    {name:"Ilya Byakin",pos:"D",sub:"LD",rating:80},
+    {name:"Alexei Gusarov",pos:"D",sub:"RD",rating:79},
+  ]},
+  "Finland 1988":{flag:"🇫🇮",nation:"Finland",players:[
+    {name:"Jari Kurri",pos:"F",sub:"RW",rating:93},
+    {name:"Esa Tikkanen",pos:"F",sub:"LW",rating:85},
+    {name:"Raimo Summanen",pos:"F",sub:"C",rating:79},
+    {name:"Petri Skriko",pos:"F",sub:"RW",rating:82},
+    {name:"Hannu Jarvenpaa",pos:"F",sub:"LW",rating:76},
+    {name:"Hannu Haapalainen",pos:"F",sub:"C",rating:75},
+    {name:"Reijo Mikkolainen",pos:"F",sub:"LW",rating:74},
+    {name:"Pekka Tuomisto",pos:"F",sub:"C",rating:74},
+    {name:"Kari Jalonen",pos:"F",sub:"RW",rating:73},
+    {name:"Timo Susi",pos:"F",sub:"C",rating:73},
+    {name:"Pekka Arbelius",pos:"F",sub:"LW",rating:72},
+    {name:"Mika Nieminen",pos:"F",sub:"RW",rating:72},
+    {name:"Teppo Numminen",pos:"D",sub:"RD",rating:84},
+    {name:"Reijo Ruotsalainen",pos:"D",sub:"RD",rating:84},
+    {name:"Risto Siltanen",pos:"D",sub:"LD",rating:81},
+    {name:"Timo Jutila",pos:"D",sub:"LD",rating:80},
+    {name:"Arto Javanainen",pos:"D",sub:"LD",rating:76},
+    {name:"Kari Eloranta",pos:"D",sub:"RD",rating:75},
+    {name:"Jarmo Myllys",pos:"G",sub:"G",rating:82},
+    {name:"Markus Ketterer",pos:"G",sub:"G",rating:79},
+  ]},
+  "Sweden 1988":{flag:"🇸🇪",nation:"Sweden",players:[
+    {name:"Mats Naslund",pos:"F",sub:"LW",rating:91},
+    {name:"Hakan Loob",pos:"F",sub:"RW",rating:89},
+    {name:"Thomas Steen",pos:"F",sub:"C",rating:86},
+    {name:"Tomas Sandstrom",pos:"F",sub:"RW",rating:86},
+    {name:"Peter Eriksson",pos:"F",sub:"C",rating:78},
+    {name:"Mikael Nylander",pos:"F",sub:"C",rating:77},
+    {name:"Bengt-Ake Gustafsson",pos:"F",sub:"C",rating:80},
+    {name:"Tommy Soderstrom",pos:"F",sub:"LW",rating:75},
+    {name:"Michael Nylander",pos:"F",sub:"LW",rating:76},
+    {name:"Charles Berglund",pos:"F",sub:"RW",rating:74},
+    {name:"Roger Akerstrom",pos:"F",sub:"LW",rating:73},
+    {name:"Lars Gunnar Pettersson",pos:"F",sub:"RW",rating:73},
+    {name:"Borje Salming",pos:"D",sub:"LD",rating:85},
+    {name:"Tommy Albelin",pos:"D",sub:"RD",rating:80},
+    {name:"Peter Andersson",pos:"D",sub:"LD",rating:78},
+    {name:"Mats Kihlstrom",pos:"D",sub:"LD",rating:76},
+    {name:"Calle Johansson",pos:"D",sub:"RD",rating:78},
+    {name:"Jan Eriksson",pos:"D",sub:"RD",rating:75},
+    {name:"Peter Lindmark",pos:"G",sub:"G",rating:82},
+    {name:"Rolf Ridderwall",pos:"G",sub:"G",rating:76},
+  ]},
+  "Canada 1988":{flag:"🇨🇦",nation:"Canada",players:[
+    {name:"Steve Yzerman",pos:"F",sub:"C",rating:90},
+    {name:"Dale Hawerchuk",pos:"F",sub:"C",rating:89},
+    {name:"Rick Tocchet",pos:"F",sub:"RW",rating:83},
+    {name:"Mike Gartner",pos:"F",sub:"RW",rating:85},
+    {name:"Serge Boisvert",pos:"F",sub:"LW",rating:78},
+    {name:"Jim Peplinski",pos:"F",sub:"C",rating:79},
+    {name:"Ken Yaremchuk",pos:"F",sub:"C",rating:77},
+    {name:"Russ Courtnall",pos:"F",sub:"LW",rating:79},
+    {name:"Jim Sandlak",pos:"F",sub:"RW",rating:76},
+    {name:"Bob Joyce",pos:"F",sub:"LW",rating:75},
+    {name:"Wally Schreiber",pos:"F",sub:"C",rating:74},
+    {name:"Marc Habscheid",pos:"F",sub:"RW",rating:76},
+    {name:"James Patrick",pos:"D",sub:"RD",rating:81},
+    {name:"Brad McCrimmon",pos:"D",sub:"LD",rating:81},
+    {name:"Normand Rochefort",pos:"D",sub:"RD",rating:78},
+    {name:"Randy Gregg",pos:"D",sub:"LD",rating:76},
+    {name:"Doug Crossman",pos:"D",sub:"LD",rating:75},
+    {name:"Tim Watters",pos:"D",sub:"RD",rating:74},
+    {name:"Andy Moog",pos:"G",sub:"G",rating:85},
+    {name:"Grant Fuhr",pos:"G",sub:"G",rating:88},
+  ]},
+  "Czechoslovakia 1988":{flag:"🇨🇿",nation:"Czechoslovakia",players:[
+    {name:"Dominik Hasek",pos:"G",sub:"G",rating:89},
+    {name:"Otakar Janecky",pos:"G",sub:"G",rating:79},
+    {name:"Jaromir Jagr",pos:"F",sub:"RW",rating:84},
+    {name:"Robert Reichel",pos:"F",sub:"C",rating:82},
+    {name:"Petr Rosol",pos:"F",sub:"LW",rating:77},
+    {name:"Richard Zemlicka",pos:"F",sub:"RW",rating:76},
+    {name:"Miloslav Horava",pos:"F",sub:"C",rating:78},
+    {name:"Jiri Lala",pos:"F",sub:"LW",rating:76},
+    {name:"Pavel Richter",pos:"F",sub:"C",rating:74},
+    {name:"Dusan Pasek",pos:"F",sub:"C",rating:79},
+    {name:"Vladimir Caldr",pos:"F",sub:"LW",rating:76},
+    {name:"Radoslav Svoboda",pos:"F",sub:"RW",rating:75},
+    {name:"Frantisek Kucera",pos:"D",sub:"LD",rating:78},
+    {name:"Jiri Slegr",pos:"D",sub:"RD",rating:78},
+    {name:"Milan Chalupa",pos:"D",sub:"LD",rating:79},
+    {name:"Arnold Kadlec",pos:"D",sub:"RD",rating:76},
+    {name:"Antonin Stavjana",pos:"D",sub:"LD",rating:75},
+    {name:"Richard Smehlik",pos:"D",sub:"RD",rating:77},
+    {name:"Jiri Kralik",pos:"G",sub:"G",rating:81},
+    {name:"Jaromir Sindel",pos:"G",sub:"G",rating:77},
+  ]},
+  "Switzerland 1988":{flag:"🇨🇭",nation:"Switzerland",players:[
+    {name:"Fredy Luthi",pos:"F",sub:"C",rating:74},
+    {name:"Thomas Vrabec",pos:"F",sub:"LW",rating:72},
+    {name:"Bruno Rogger",pos:"F",sub:"C",rating:71},
+    {name:"Peter Schlagenhauf",pos:"F",sub:"RW",rating:71},
+    {name:"Andreas Beutler",pos:"F",sub:"C",rating:69},
+    {name:"Christian Loosli",pos:"F",sub:"LW",rating:68},
+    {name:"Andy Ton",pos:"F",sub:"RW",rating:68},
+    {name:"Patrick Sutter",pos:"F",sub:"C",rating:67},
+    {name:"Lars Leuenberger",pos:"F",sub:"LW",rating:67},
+    {name:"Manuele Celio",pos:"F",sub:"RW",rating:66},
+    {name:"Romano Piazza",pos:"F",sub:"C",rating:67},
+    {name:"Fredy Wittwer",pos:"F",sub:"LW",rating:66},
+    {name:"Peter Jaks",pos:"D",sub:"RD",rating:70},
+    {name:"Bruno Rogger",pos:"D",sub:"LD",rating:70},
+    {name:"Andreas Ton",pos:"D",sub:"LD",rating:68},
+    {name:"Marco Schmutz",pos:"D",sub:"RD",rating:67},
+    {name:"Felix Hollenstein",pos:"D",sub:"LD",rating:67},
+    {name:"Roland Dellsperger",pos:"D",sub:"RD",rating:66},
+    {name:"Renato Tosio",pos:"G",sub:"G",rating:73},
+    {name:"Reto Pavoni",pos:"G",sub:"G",rating:71},
+  ]},
+  "West Germany 1988":{flag:"🇩🇪",nation:"West Germany",players:[
+    {name:"Erich Kuhnhackl",pos:"F",sub:"C",rating:83},
+    {name:"Dieter Hegen",pos:"F",sub:"RW",rating:74},
+    {name:"Karl Friesen",pos:"F",sub:"LW",rating:76},
+    {name:"Ernst Kopf",pos:"F",sub:"LW",rating:75},
+    {name:"Roy Roedger",pos:"F",sub:"RW",rating:72},
+    {name:"Thomas Brandl",pos:"F",sub:"C",rating:72},
+    {name:"Josef Schickengruber",pos:"F",sub:"C",rating:73},
+    {name:"Bernd Truntschka",pos:"F",sub:"RW",rating:72},
+    {name:"Andreas Niederberger",pos:"F",sub:"LW",rating:70},
+    {name:"Georg Franz",pos:"F",sub:"C",rating:70},
+    {name:"Harold Kreis",pos:"F",sub:"LW",rating:71},
+    {name:"Peter Draisaitl",pos:"F",sub:"RW",rating:71},
+    {name:"Udo Kiessling",pos:"D",sub:"LD",rating:82},
+    {name:"Franz Reindl",pos:"D",sub:"RD",rating:75},
+    {name:"Peter Obresa",pos:"D",sub:"LD",rating:73},
+    {name:"Klaus Merk",pos:"D",sub:"RD",rating:72},
+    {name:"Michael Kreuzer",pos:"D",sub:"LD",rating:71},
+    {name:"Joachim Reil",pos:"D",sub:"RD",rating:71},
+    {name:"Sigmund Suttner",pos:"G",sub:"G",rating:77},
+    {name:"Karl-Heinz Friesen",pos:"G",sub:"G",rating:73},
+  ]},
+  "Poland 1988":{flag:"🇵🇱",nation:"Poland",players:[
+    {name:"Henryk Gruth",pos:"G",sub:"G",rating:74},
+    {name:"Marek Cholewa",pos:"G",sub:"G",rating:72},
+    {name:"Andrzej Iskrzycki",pos:"F",sub:"C",rating:72},
+    {name:"Wieslaw Jobczyk",pos:"F",sub:"LW",rating:70},
+    {name:"Leszek Tokarz",pos:"F",sub:"LW",rating:69},
+    {name:"Janusz Adamiec",pos:"F",sub:"RW",rating:69},
+    {name:"Dariusz Garbocz",pos:"F",sub:"C",rating:68},
+    {name:"Stefan Chowaniec",pos:"F",sub:"C",rating:69},
+    {name:"Marek Stebnicki",pos:"F",sub:"RW",rating:67},
+    {name:"Leszek Jachna",pos:"F",sub:"C",rating:67},
+    {name:"Andrzej Zabawa",pos:"F",sub:"LW",rating:66},
+    {name:"Krzysztof Bialkowski",pos:"F",sub:"RW",rating:66},
+    {name:"Andrzej Zaczek",pos:"D",sub:"RD",rating:70},
+    {name:"Waldemar Klisiak",pos:"D",sub:"LD",rating:68},
+    {name:"Andrzej Hanisz",pos:"D",sub:"LD",rating:67},
+    {name:"Henryk Pytel",pos:"D",sub:"RD",rating:67},
+    {name:"Krzysztof Podsiadlo",pos:"D",sub:"LD",rating:66},
+    {name:"Robert Szopinski",pos:"D",sub:"RD",rating:65},
+    {name:"Andrzej Tkacz",pos:"D",sub:"LD",rating:65},
+    {name:"Jacek Baran",pos:"D",sub:"RD",rating:64},
+  ]},
+  "France 1988":{flag:"🇫🇷",nation:"France",players:[
+    {name:"Philippe Bozon",pos:"F",sub:"LW",rating:70},
+    {name:"Serge Poudrier",pos:"F",sub:"C",rating:69},
+    {name:"Antoine Richer",pos:"F",sub:"LW",rating:67},
+    {name:"Christian Pouget",pos:"F",sub:"RW",rating:67},
+    {name:"Patrick Francheterre",pos:"F",sub:"C",rating:66},
+    {name:"Bernard Deschamps",pos:"F",sub:"RW",rating:66},
+    {name:"Arnaud Briand",pos:"F",sub:"LW",rating:66},
+    {name:"Laurent Meunier",pos:"F",sub:"C",rating:65},
+    {name:"Stephane Barin",pos:"F",sub:"RW",rating:65},
+    {name:"Pierre Pousse",pos:"F",sub:"LW",rating:64},
+    {name:"Yves Crettenand",pos:"F",sub:"C",rating:65},
+    {name:"Jean-Marc Djian",pos:"F",sub:"RW",rating:64},
+    {name:"Christian Pouget",pos:"D",sub:"LD",rating:66},
+    {name:"Luc Tardif",pos:"D",sub:"RD",rating:65},
+    {name:"Roger Chretien",pos:"D",sub:"LD",rating:64},
+    {name:"Denis Perez",pos:"D",sub:"RD",rating:64},
+    {name:"Jean-Philippe Lemoine",pos:"D",sub:"LD",rating:63},
+    {name:"Franck Pajonkowski",pos:"D",sub:"RD",rating:63},
+    {name:"Fabrice Lhenry",pos:"G",sub:"G",rating:70},
+    {name:"Michel Leblanc",pos:"G",sub:"G",rating:67},
+  ]},
+  "Unified Team 1992":{flag:"🏳️",nation:"Unified Team",players:[
+    {name:"Sergei Makarov",pos:"F",sub:"RW",rating:92},
+    {name:"Igor Larionov",pos:"F",sub:"C",rating:91},
+    {name:"Valeri Kamensky",pos:"F",sub:"LW",rating:89},
+    {name:"Alexei Kovalev",pos:"F",sub:"RW",rating:87},
+    {name:"Evgeni Davydov",pos:"F",sub:"LW",rating:83},
+    {name:"Andrei Khomutov",pos:"F",sub:"RW",rating:84},
+    {name:"Igor Boldin",pos:"F",sub:"C",rating:79},
+    {name:"Ravil Khaidarov",pos:"F",sub:"LW",rating:78},
+    {name:"Nikolai Borschevsky",pos:"F",sub:"RW",rating:80},
+    {name:"Alexei Zhamnov",pos:"F",sub:"C",rating:82},
+    {name:"Vyacheslav Butsayev",pos:"F",sub:"C",rating:79},
+    {name:"Yuri Khmylev",pos:"F",sub:"LW",rating:77},
+    {name:"Vyacheslav Fetisov",pos:"D",sub:"LD",rating:91},
+    {name:"Alexei Kasatonov",pos:"D",sub:"RD",rating:86},
+    {name:"Darius Kasparaitis",pos:"D",sub:"RD",rating:82},
+    {name:"Alexei Zhitnik",pos:"D",sub:"LD",rating:83},
+    {name:"Igor Kravchuk",pos:"D",sub:"LD",rating:80},
+    {name:"Dmitri Mironov",pos:"D",sub:"RD",rating:79},
+    {name:"Nikolai Khabibulin",pos:"G",sub:"G",rating:84},
+    {name:"Sergei Mylnikov",pos:"G",sub:"G",rating:82},
+  ]},
+  "Canada 1992":{flag:"🇨🇦",nation:"Canada",players:[
+    {name:"Eric Lindros",pos:"F",sub:"C",rating:90},
+    {name:"Joe Juneau",pos:"F",sub:"LW",rating:81},
+    {name:"Todd Hlushko",pos:"F",sub:"C",rating:77},
+    {name:"Dave Trottier",pos:"F",sub:"RW",rating:75},
+    {name:"Gord Sherven",pos:"F",sub:"C",rating:74},
+    {name:"Kent Manderville",pos:"F",sub:"LW",rating:73},
+    {name:"Randy Smith",pos:"F",sub:"C",rating:72},
+    {name:"Chris Lindberg",pos:"F",sub:"LW",rating:72},
+    {name:"Jason Marshall",pos:"F",sub:"RW",rating:73},
+    {name:"Dave Archibald",pos:"F",sub:"C",rating:74},
+    {name:"Wally Schreiber",pos:"F",sub:"LW",rating:72},
+    {name:"Tom Tilley",pos:"F",sub:"RW",rating:71},
+    {name:"Adrian Aucoin",pos:"D",sub:"RD",rating:78},
+    {name:"Brad Schlegel",pos:"D",sub:"LD",rating:76},
+    {name:"Curt Giles",pos:"D",sub:"LD",rating:74},
+    {name:"Chris Lindberg",pos:"D",sub:"RD",rating:73},
+    {name:"Derek Mayer",pos:"D",sub:"LD",rating:73},
+    {name:"John Slaney",pos:"D",sub:"RD",rating:75},
+    {name:"Sean Burke",pos:"G",sub:"G",rating:83},
+    {name:"Trevor Kidd",pos:"G",sub:"G",rating:78},
+  ]},
+  "Czechoslovakia 1992":{flag:"🇨🇿",nation:"Czechoslovakia",players:[
+    {name:"Dominik Hasek",pos:"G",sub:"G",rating:93},
+    {name:"Otakar Janecky",pos:"G",sub:"G",rating:80},
+    {name:"Jaromir Jagr",pos:"F",sub:"RW",rating:90},
+    {name:"Robert Reichel",pos:"F",sub:"C",rating:84},
+    {name:"Martin Straka",pos:"F",sub:"C",rating:81},
+    {name:"Petr Nedved",pos:"F",sub:"C",rating:82},
+    {name:"Jiri Dolezal",pos:"F",sub:"LW",rating:76},
+    {name:"Robert Kron",pos:"F",sub:"LW",rating:78},
+    {name:"Drahomir Kadlec",pos:"F",sub:"RW",rating:77},
+    {name:"Bedrich Scerban",pos:"F",sub:"LW",rating:75},
+    {name:"Oldrich Valek",pos:"F",sub:"C",rating:74},
+    {name:"Jan Votak",pos:"F",sub:"RW",rating:74},
+    {name:"Richard Smehlik",pos:"D",sub:"RD",rating:79},
+    {name:"Frantisek Kucera",pos:"D",sub:"LD",rating:79},
+    {name:"Jiri Slegr",pos:"D",sub:"RD",rating:79},
+    {name:"Drahomir Kadlec",pos:"D",sub:"LD",rating:77},
+    {name:"Bedrich Scerban",pos:"D",sub:"RD",rating:75},
+    {name:"Petr Hrbek",pos:"D",sub:"LD",rating:75},
+    {name:"Petr Briza",pos:"G",sub:"G",rating:78},
+    {name:"Jiri Kralik",pos:"G",sub:"G",rating:80},
+  ]},
+  "Sweden 1992":{flag:"🇸🇪",nation:"Sweden",players:[
+    {name:"Peter Forsberg",pos:"F",sub:"C",rating:91},
+    {name:"Mats Naslund",pos:"F",sub:"LW",rating:88},
+    {name:"Hakan Loob",pos:"F",sub:"RW",rating:86},
+    {name:"Tomas Sandstrom",pos:"F",sub:"RW",rating:84},
+    {name:"Henrik Zetterberg",pos:"F",sub:"LW",rating:80},
+    {name:"Mikael Nylander",pos:"F",sub:"C",rating:79},
+    {name:"Charles Berglund",pos:"F",sub:"C",rating:74},
+    {name:"Bengt-Ake Gustafsson",pos:"F",sub:"C",rating:78},
+    {name:"Mikael Johansson",pos:"F",sub:"LW",rating:75},
+    {name:"Lars Edstrom",pos:"F",sub:"RW",rating:74},
+    {name:"Roger Johansson",pos:"F",sub:"LW",rating:76},
+    {name:"Goran Hogosta",pos:"F",sub:"RW",rating:73},
+    {name:"Nicklas Lidstrom",pos:"D",sub:"RD",rating:89},
+    {name:"Tommy Albelin",pos:"D",sub:"LD",rating:79},
+    {name:"Roger Johansson",pos:"D",sub:"RD",rating:77},
+    {name:"Hakan Sodergren",pos:"D",sub:"LD",rating:76},
+    {name:"Peter Andersson",pos:"D",sub:"LD",rating:76},
+    {name:"Calle Johansson",pos:"D",sub:"RD",rating:78},
+    {name:"Tommy Salo",pos:"G",sub:"G",rating:80},
+    {name:"Peter Lindmark",pos:"G",sub:"G",rating:79},
+  ]},
+  "Finland 1992":{flag:"🇫🇮",nation:"Finland",players:[
+    {name:"Jari Kurri",pos:"F",sub:"RW",rating:91},
+    {name:"Esa Tikkanen",pos:"F",sub:"LW",rating:83},
+    {name:"Petri Skriko",pos:"F",sub:"RW",rating:81},
+    {name:"Saku Koivu",pos:"F",sub:"C",rating:80},
+    {name:"Raimo Summanen",pos:"F",sub:"C",rating:78},
+    {name:"Teppo Numminen",pos:"F",sub:"C",rating:79},
+    {name:"Ville Siren",pos:"F",sub:"LW",rating:76},
+    {name:"Hannu Haapalainen",pos:"F",sub:"LW",rating:73},
+    {name:"Pekka Tuomisto",pos:"F",sub:"C",rating:73},
+    {name:"Timo Susi",pos:"F",sub:"RW",rating:72},
+    {name:"Kari Jalonen",pos:"F",sub:"LW",rating:74},
+    {name:"Mika Nieminen",pos:"F",sub:"RW",rating:73},
+    {name:"Teppo Numminen",pos:"D",sub:"RD",rating:85},
+    {name:"Timo Jutila",pos:"D",sub:"LD",rating:79},
+    {name:"Janne Niinimaa",pos:"D",sub:"RD",rating:77},
+    {name:"Ville Siren",pos:"D",sub:"LD",rating:76},
+    {name:"Simo Saarinen",pos:"D",sub:"LD",rating:74},
+    {name:"Pekka Peltola",pos:"D",sub:"RD",rating:73},
+    {name:"Markus Ketterer",pos:"G",sub:"G",rating:80},
+    {name:"Jari Lindqvist",pos:"G",sub:"G",rating:77},
+  ]},
+  "USA 1992":{flag:"🇺🇸",nation:"USA",players:[
+    {name:"Brett Hull",pos:"F",sub:"RW",rating:92},
+    {name:"Pat LaFontaine",pos:"F",sub:"C",rating:88},
+    {name:"Mike Modano",pos:"F",sub:"C",rating:87},
+    {name:"Jeremy Roenick",pos:"F",sub:"C",rating:86},
+    {name:"Keith Tkachuk",pos:"F",sub:"LW",rating:82},
+    {name:"Joe Mullen",pos:"F",sub:"RW",rating:83},
+    {name:"Clark Gillies",pos:"F",sub:"LW",rating:77},
+    {name:"Steve Leach",pos:"F",sub:"RW",rating:77},
+    {name:"Ted Donato",pos:"F",sub:"C",rating:76},
+    {name:"Dave Tippett",pos:"F",sub:"LW",rating:74},
+    {name:"Ray Ferraro",pos:"F",sub:"C",rating:78},
+    {name:"Randy Wood",pos:"F",sub:"LW",rating:74},
+    {name:"Chris Chelios",pos:"D",sub:"RD",rating:90},
+    {name:"Brian Leetch",pos:"D",sub:"LD",rating:91},
+    {name:"Phil Housley",pos:"D",sub:"LD",rating:84},
+    {name:"Gary Suter",pos:"D",sub:"RD",rating:82},
+    {name:"Jim Johnson",pos:"D",sub:"LD",rating:76},
+    {name:"Barry Richter",pos:"D",sub:"RD",rating:75},
+    {name:"Mike Richter",pos:"G",sub:"G",rating:88},
+    {name:"John Vanbiesbrouck",pos:"G",sub:"G",rating:85},
+  ]},
+  "Germany 1992":{flag:"🇩🇪",nation:"Germany",players:[
+    {name:"Erich Kuhnhackl",pos:"F",sub:"C",rating:79},
+    {name:"Dieter Hegen",pos:"F",sub:"RW",rating:76},
+    {name:"Bernd Truntschka",pos:"F",sub:"RW",rating:75},
+    {name:"Josef Heiß",pos:"F",sub:"LW",rating:72},
+    {name:"Peter Draisaitl",pos:"F",sub:"C",rating:73},
+    {name:"Andreas Niederberger",pos:"F",sub:"LW",rating:70},
+    {name:"Georg Franz",pos:"F",sub:"C",rating:70},
+    {name:"Roy Roedger",pos:"F",sub:"RW",rating:71},
+    {name:"Benoit Doucet",pos:"F",sub:"C",rating:70},
+    {name:"Marian Bazany",pos:"F",sub:"LW",rating:69},
+    {name:"Ernst Kopf",pos:"F",sub:"LW",rating:71},
+    {name:"Richard Amann",pos:"F",sub:"RW",rating:68},
+    {name:"Udo Kiessling",pos:"D",sub:"LD",rating:78},
+    {name:"Thomas Brandl",pos:"D",sub:"RD",rating:73},
+    {name:"Peter Schiller",pos:"D",sub:"LD",rating:70},
+    {name:"Alexander Serikow",pos:"D",sub:"RD",rating:69},
+    {name:"Michael Kreuzer",pos:"D",sub:"LD",rating:70},
+    {name:"Reinhard Fendt",pos:"D",sub:"RD",rating:68},
+    {name:"Andreas Benz",pos:"G",sub:"G",rating:74},
+    {name:"Helmut de Raaf",pos:"G",sub:"G",rating:72},
+  ]},
+  "Switzerland 1992":{flag:"🇨🇭",nation:"Switzerland",players:[
+    {name:"Fredy Luthi",pos:"F",sub:"C",rating:75},
+    {name:"Thomas Vrabec",pos:"F",sub:"LW",rating:73},
+    {name:"Andreas Beutler",pos:"F",sub:"C",rating:70},
+    {name:"Romano Piazza",pos:"F",sub:"RW",rating:70},
+    {name:"Christian Loosli",pos:"F",sub:"LW",rating:68},
+    {name:"Patrick Sutter",pos:"F",sub:"C",rating:67},
+    {name:"Andy Ton",pos:"F",sub:"RW",rating:67},
+    {name:"Lars Leuenberger",pos:"F",sub:"LW",rating:66},
+    {name:"Manuele Celio",pos:"F",sub:"RW",rating:66},
+    {name:"Marco Kleis",pos:"F",sub:"C",rating:65},
+    {name:"Samuel Balmer",pos:"F",sub:"LW",rating:66},
+    {name:"Patrice Brasey",pos:"F",sub:"RW",rating:65},
+    {name:"Peter Jaks",pos:"D",sub:"RD",rating:72},
+    {name:"Samuel Balmer",pos:"D",sub:"LD",rating:70},
+    {name:"Andreas Ton",pos:"D",sub:"LD",rating:69},
+    {name:"Marco Schmutz",pos:"D",sub:"RD",rating:68},
+    {name:"Felix Hollenstein",pos:"D",sub:"LD",rating:67},
+    {name:"Roland Dellsperger",pos:"D",sub:"RD",rating:66},
+    {name:"Renato Tosio",pos:"G",sub:"G",rating:74},
+    {name:"Reto Pavoni",pos:"G",sub:"G",rating:72},
+  ]},
+  "Norway 1992":{flag:"🇳🇴",nation:"Norway",players:[
+    {name:"Espen Knutsen",pos:"F",sub:"C",rating:72},
+    {name:"Jim Martinsen",pos:"F",sub:"RW",rating:70},
+    {name:"Geir Myhre",pos:"F",sub:"LW",rating:68},
+    {name:"Petter Salsten",pos:"F",sub:"LW",rating:67},
+    {name:"Tom Rowe",pos:"F",sub:"RW",rating:66},
+    {name:"Jan Roar Fagerli",pos:"F",sub:"C",rating:65},
+    {name:"Trond Magnussen",pos:"F",sub:"C",rating:65},
+    {name:"Cato Andersen",pos:"F",sub:"RW",rating:64},
+    {name:"Lars Erik Spets",pos:"F",sub:"LW",rating:67},
+    {name:"Marius Rath",pos:"F",sub:"C",rating:64},
+    {name:"Kurt Lysenstoen",pos:"F",sub:"LW",rating:64},
+    {name:"Morten Finstad",pos:"F",sub:"RW",rating:63},
+    {name:"Petter Salsten",pos:"D",sub:"LD",rating:67},
+    {name:"Roy Johansen",pos:"D",sub:"RD",rating:67},
+    {name:"Tommy Jakobsen",pos:"D",sub:"LD",rating:68},
+    {name:"Bjorn Skaare",pos:"D",sub:"RD",rating:65},
+    {name:"Vidar Bjorn",pos:"D",sub:"LD",rating:64},
+    {name:"Ivar Formo",pos:"D",sub:"RD",rating:63},
+    {name:"Pal Grotnes",pos:"G",sub:"G",rating:71},
+    {name:"Robert Schistad",pos:"G",sub:"G",rating:69},
+  ]},
+};
+
+
+// ================================================================
+// LINEUP STRUCTURE
+// ================================================================
+const LINEUP_TEMPLATE = [
+  // Forwards: 4 lines × 3 (LW, C, RW)
+  {id:"F1-LW",label:"Line 1 LW",pos:"F",sub:"LW",line:1,icetime:1.0},
+  {id:"F1-C", label:"Line 1 C", pos:"F",sub:"C", line:1,icetime:1.0},
+  {id:"F1-RW",label:"Line 1 RW",pos:"F",sub:"RW",line:1,icetime:1.0},
+  {id:"F2-LW",label:"Line 2 LW",pos:"F",sub:"LW",line:2,icetime:0.75},
+  {id:"F2-C", label:"Line 2 C", pos:"F",sub:"C", line:2,icetime:0.75},
+  {id:"F2-RW",label:"Line 2 RW",pos:"F",sub:"RW",line:2,icetime:0.75},
+  {id:"F3-LW",label:"Line 3 LW",pos:"F",sub:"LW",line:3,icetime:0.55},
+  {id:"F3-C", label:"Line 3 C", pos:"F",sub:"C", line:3,icetime:0.55},
+  {id:"F3-RW",label:"Line 3 RW",pos:"F",sub:"RW",line:3,icetime:0.55},
+  {id:"F4-LW",label:"Line 4 LW",pos:"F",sub:"LW",line:4,icetime:0.35},
+  {id:"F4-C", label:"Line 4 C", pos:"F",sub:"C", line:4,icetime:0.35},
+  {id:"F4-RW",label:"Line 4 RW",pos:"F",sub:"RW",line:4,icetime:0.35},
+  // Defense: 3 pairs
+  {id:"D1-LD",label:"Pair 1 LD",pos:"D",sub:"LD",line:1,icetime:1.0},
+  {id:"D1-RD",label:"Pair 1 RD",pos:"D",sub:"RD",line:1,icetime:1.0},
+  {id:"D2-LD",label:"Pair 2 LD",pos:"D",sub:"LD",line:2,icetime:0.72},
+  {id:"D2-RD",label:"Pair 2 RD",pos:"D",sub:"RD",line:2,icetime:0.72},
+  {id:"D3-LD",label:"Pair 3 LD",pos:"D",sub:"LD",line:3,icetime:0.45},
+  {id:"D3-RD",label:"Pair 3 RD",pos:"D",sub:"RD",line:3,icetime:0.45},
+  // Goalies
+  {id:"G-S",  label:"Starter G", pos:"G",sub:"G", line:1,icetime:1.0},
+  {id:"G-B",  label:"Backup G",  pos:"G",sub:"G", line:2,icetime:0.0},
+];
+
+// ================================================================
+// GAME STATE
+// ================================================================
+let G = {
+  mode: 'classic', otFormat: 'sd',
+  lineup: {}, // slotId -> {player}
+  draftedNames: new Set(), // player names already drafted
+  usedNations: new Set(),  // nation strings (e.g. "Canada") already drawn
+  draftPool: [],           // remaining team keys to show
+  currentTeamKey: null,
+  // tournament
+  bracket: null,
+  tourResults: [],
+  curMatchIdx: 0,
+  eliminated: false,
+};
+
+
+
+// ================================================================
+// HELPERS
+// ================================================================
+function rand(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+function pick(arr){return arr[rand(0,arr.length-1)]}
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=rand(0,i);[a[i],a[j]]=[a[j],a[i]];}return a}
+function rCol(r){if(r>=95)return'#f5c842';if(r>=90)return'#a0d96c';if(r>=84)return'#7ec8e3';return'#8899aa'}
+function escQ(s){return s.replace(/'/g,"\\'")}
+function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+function showSc(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById('sc-'+id).classList.add('active')}
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2300)}
+
+// ================================================================
+// STRATEGY / SETTINGS
+// ================================================================
+
+function setOT(f){G.otFormat=f;document.getElementById('ot-sd').classList.toggle('on',f==='sd');document.getElementById('ot-so').classList.toggle('on',f==='so')}
+function setMode(m){G.mode=m;document.getElementById('mb-classic').classList.toggle('on',m==='classic');document.getElementById('mb-blind').classList.toggle('on',m==='blind')}
+
+// ================================================================
+// DRAFT
+// ================================================================
+function startDraft(){
+  showSc('draft');
+
+  renderLineupDisplay();
+  buildDraftPool();
+  rollNextTeam();
+}
+
+function buildDraftPool(){
+  // Shuffle all team keys; but enforce one-nation rule as we draw
+  G.draftPool = shuffle(Object.keys(NATIONS));
+  G.usedNations = new Set();
+  G.draftedNames = new Set();
+}
+
+function rollNextTeam(){
+  // find next team in pool whose nation hasn't been used this round
+  let key = null;
+  for(let k of G.draftPool){
+    if(!G.usedNations.has(NATIONS[k].nation)){ key = k; break; }
+  }
+
+  if(!key){
+    // All nations exhausted — start a new round, reset used nations
+    // but keep track of already-drafted player names so duplicates still blocked
+    G.usedNations = new Set();
+    G.draftPool = shuffle(Object.keys(NATIONS));
+    // pick first available
+    for(let k of G.draftPool){
+      if(!G.usedNations.has(NATIONS[k].nation)){ key = k; break; }
+    }
+  }
+
+  if(!key){
+    // absolute fallback — just pick any team
+    key = Object.keys(NATIONS)[0];
+  }
+
+  G.draftPool = G.draftPool.filter(k => k !== key);
+  G.currentTeamKey = key;
+  G.usedNations.add(NATIONS[key].nation);
+  renderRollCard();
+}
+
+function renderRollCard(){
+  const key = G.currentTeamKey;
+  const {flag, players} = NATIONS[key];
+  const avg = Math.round(players.reduce((s,p)=>s+p.rating,0)/players.length);
+
+  const rollDiv = document.createElement('div');
+  rollDiv.className = 'roll-card';
+  rollDiv.innerHTML = `
+    <div class="thdr">
+      <div class="tflag">${flag}</div>
+      <div style="flex:1"><div class="tname">${key}</div><div class="tyear">Olympic Roster</div></div>
+      ${G.mode==='classic'?`<div class="tavg"><div class="tavg-n">${avg}</div><div class="tavg-l">Avg</div></div>`:''}
+    </div>
+    <div class="plist" id="plist-inner"></div>`;
+
+  const plist = rollDiv.querySelector('#plist-inner');
+
+  players.forEach(p => {
+    const drafted = G.draftedNames.has(p.name);
+    const available = !drafted && slotsAvailableFor(p.pos, p.sub).length > 0;
+    const hl = available && p.rating >= 88 ? 'hl' : '';
+    const cls = drafted ? 'drafted' : (!available ? 'dim' : hl);
+    const rat = G.mode==='blind'
+      ? `<span class="prat-h">??</span>`
+      : `<span class="prat" style="color:${rCol(p.rating)}">${p.rating}</span>`;
+
+    const row = document.createElement('div');
+    row.className = `prow ${cls}`;
+    row.innerHTML = `<span class="ppos p${p.pos}">${p.sub}</span>
+      <span class="pname">${p.name}${drafted ? ' <span style="font-size:10px;color:var(--silver)">(drafted)</span>' : ''}</span>${rat}`;
+
+    if (available) {
+      row.addEventListener('click', () => openSlotModal(p, key));
+    }
+    plist.appendChild(row);
+  });
+
+  const area = document.getElementById('roll-area');
+  area.innerHTML = '';
+  area.appendChild(rollDiv);
+  updateDraftHUD();
+}
+
+function slotsAvailableFor(pos, sub){
+  return LINEUP_TEMPLATE.filter(sl=>sl.pos===pos && sl.sub===sub && !G.lineup[sl.id]);
+}
+
+function totalFilled(){ return Object.keys(G.lineup).length }
+function totalLeft(){ return 20 - totalFilled() }
+
+function updateDraftHUD(){
+  document.getElementById('h-left').textContent = totalLeft();
+  const vals = Object.values(G.lineup);
+  const avg = vals.length ? Math.round(vals.reduce((s,p)=>s+p.rating,0)/vals.length) : '—';
+  document.getElementById('h-avg').textContent = avg;
+  document.getElementById('h-nation').textContent = G.usedNations.size;
+  document.getElementById('prog').style.width = `${totalFilled()/20*100}%`;
+  document.getElementById('roster-count').textContent = `${totalFilled()} / 20`;
+  document.getElementById('sim-btn').disabled = totalLeft() > 0;
+}
+
+// ================================================================
+// SLOT MODAL
+// ================================================================
+let pendingPick = null;
+
+function openSlotModal(player, teamKey){
+  if(G.draftedNames.has(player.name)){showToast('Already drafted!');return}
+  const available = slotsAvailableFor(player.pos, player.sub);
+  if(!available.length){showToast(`No ${player.sub} slots left!`);return}
+  pendingPick = {...player, teamKey, flag: NATIONS[teamKey].flag};
+
+  const ov = document.getElementById('modal-overlay');
+  ov.innerHTML = '';
+
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  modal.innerHTML = `
+    <div class="modal-title">Assign ${player.name}</div>
+    <div class="modal-sub">${player.sub} · ${G.mode==='blind'?'??':player.rating} OVR · ${NATIONS[teamKey].flag} ${teamKey}</div>`;
+
+  LINEUP_TEMPLATE.filter(sl => sl.pos===player.pos && sl.sub===player.sub).forEach(sl => {
+    const taken = !!G.lineup[sl.id];
+    const takenName = taken ? G.lineup[sl.id].name : '';
+    const btn = document.createElement('div');
+    btn.className = `slot-btn${taken?' taken':''}`;
+    btn.innerHTML = `<span class="slot-tag">${sl.label.split(' ').slice(0,2).join(' ')}</span>
+      <span class="slot-name">${taken ? takenName : '— empty —'}</span>
+      ${taken ? '<span class="slot-taken-txt">Filled</span>' : ''}`;
+    if(!taken){
+      btn.addEventListener('click', () => assignToSlot(sl.id));
+    }
+    modal.appendChild(btn);
+  });
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'btn btn-ghost btn-full';
+  cancelBtn.style.marginTop = '10px';
+  cancelBtn.textContent = 'Cancel';
+  cancelBtn.addEventListener('click', closeModal);
+  modal.appendChild(cancelBtn);
+
+  ov.appendChild(modal);
+  ov.style.display = 'flex';
+}
+
+function closeModal(){
+  const ov = document.getElementById('modal-overlay');
+  ov.style.display = 'none';
+  ov.innerHTML = '';
+  pendingPick = null;
+}
+
+function assignToSlot(slotId){
+  if(!pendingPick)return;
+  G.lineup[slotId] = {...pendingPick};
+  G.draftedNames.add(pendingPick.name);
+  closeModal();
+  renderLineupDisplay();
+  updateDraftHUD();
+  const left = totalLeft();
+  if(left > 0){ rollNextTeam(); }
+  else {
+    document.getElementById('roll-area').innerHTML=`<div style="background:var(--card);border:1px solid var(--border);border-radius:13px;padding:24px;text-align:center;margin-bottom:12px">
+      <div style="font-size:40px;margin-bottom:8px">✅</div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:2px;color:var(--gold)">ROSTER COMPLETE</div>
+      <div style="color:var(--silver);font-size:13px;margin-top:5px">20 players locked in — view the bracket!</div>
+    </div>`;
+  }
+}
+
+// ================================================================
+// LINEUP DISPLAY
+// ================================================================
+function renderLineupDisplay(){
+  const lines = [
+    {label:'FORWARDS',groups:[
+      {label:'Line 1',slots:['F1-LW','F1-C','F1-RW']},
+      {label:'Line 2',slots:['F2-LW','F2-C','F2-RW']},
+      {label:'Line 3',slots:['F3-LW','F3-C','F3-RW']},
+      {label:'Line 4',slots:['F4-LW','F4-C','F4-RW']},
+    ]},
+    {label:'DEFENSE',groups:[
+      {label:'Pair 1',slots:['D1-LD','D1-RD']},
+      {label:'Pair 2',slots:['D2-LD','D2-RD']},
+      {label:'Pair 3',slots:['D3-LD','D3-RD']},
+    ]},
+    {label:'GOALIES',groups:[
+      {label:'',slots:['G-S','G-B']},
+    ]},
+  ];
+
+  let html='';
+  lines.forEach(section=>{
+    html+=`<div style="margin-bottom:12px"><div class="lbl">${section.label}</div>`;
+    section.groups.forEach(grp=>{
+      html+=`<div style="margin-bottom:6px">`;
+      if(grp.label) html+=`<div class="rline-lbl">${grp.label}</div>`;
+      html+=`<div style="display:flex;gap:5px">`;
+      grp.slots.forEach(sid=>{
+        const tmpl = LINEUP_TEMPLATE.find(t=>t.id===sid);
+        const p = G.lineup[sid];
+        const subLabel = sid.split('-').slice(-1)[0];
+        if(p){
+          html+=`<div class="rslot filled sl${p.pos}" style="flex:1">
+            <div class="rs-pos">${subLabel}</div>
+            <div class="rs-name">${p.name.split(' ').slice(-1)[0]}</div>
+            ${G.mode==='classic'?`<div class="rs-rat">${p.rating}</div>`:''}
+            <div class="rs-co">${p.flag}</div>
+          </div>`;
+        } else {
+          html+=`<div class="rslot" style="flex:1">
+            <div class="rs-ico">${tmpl.pos==='G'?'🥅':tmpl.pos==='D'?'🛡':'🏒'}</div>
+            <div style="font-size:8px;color:rgba(255,255,255,.2);margin-top:2px">${subLabel}</div>
+          </div>`;
+        }
+      });
+      html+=`</div></div>`;
+    });
+    html+=`</div>`;
+  });
+  document.getElementById('lineup-display').innerHTML=html;
+}
+
+// ================================================================
+// BRACKET GENERATION
+// ================================================================
+function goToBracket(){
+  showSc('bracket');
+  generateBracket();
+  renderBracket();
+}
+
+function generateBracket(){
+  const draftedNations = new Set(
+    Object.values(G.lineup).map(p=>NATIONS[p.teamKey]?.nation).filter(Boolean)
+  );
+  const allKeys = Object.keys(NATIONS);
+
+  function buildPool(allowDrafted){
+    const seen = new Set(); const out = [];
+    shuffle(allKeys).forEach(k=>{
+      const nat=NATIONS[k].nation;
+      if(!seen.has(nat)&&(allowDrafted||!draftedNations.has(nat))){seen.add(nat);out.push(k);}
+    });
+    return out;
+  }
+
+  let pool = buildPool(false);
+  if(pool.length < 11) pool = buildPool(true);
+
+  // Convert to objects sorted strongest-first
+  const allOpps = pool
+    .map(k=>({key:k,flag:NATIONS[k].flag,name:k,displayName:k,
+               nation:NATIONS[k].nation,str:computeOppStrength(k),isYou:false}))
+    .sort((a,b)=>b.str-a.str);
+
+  // Take top 6 by strength as "strong" (no fixed threshold — works even if pool has few 80+ teams)
+  // Shuffle within top/bottom halves for variety
+  const top6  = shuffle(allOpps.slice(0,6));
+  const bot   = shuffle(allOpps.slice(6));
+
+  // Need at least 3 "weak" teams (bottom tier). Use bottom 3 from the non-top6 pool.
+  // If pool is very small, fall back to the weakest of top6.
+  let weakSlots, extraPool;
+  if(bot.length >= 3){
+    weakSlots  = bot.slice(0,3);
+    extraPool  = shuffle(bot.slice(3));
+  } else {
+    // fewer than 3 in bottom — supplement with weakest of top6
+    weakSlots  = [...bot, ...top6.slice(-(3-bot.length))];
+    extraPool  = shuffle(top6.slice(0, 6-(3-bot.length)));
+  }
+
+  // Layout (11 opponents):
+  //   Your group: [top6[0], top6[1], weak[0], YOU]
+  //   Group B:    [top6[2], top6[3], weak[1], extra0]
+  //   Group C:    [top6[4], top6[5], weak[2], extra1]
+  // Each group always has the 2 strongest available + 1 weakest available → guaranteed balance.
+
+  const e0 = extraPool[0] || top6[0];
+  const e1 = extraPool[1] || top6[1];
+
+  const myStr = computeMyStrength();
+  const myEntry = {key:'__you__',flag:'🏒',name:'Your Team',displayName:'Your Team',
+                   nation:'You',str:myStr,isYou:true};
+
+  const myGroupIdx = Math.floor(Math.random()*3);
+  const grps = [
+    [top6[0], top6[1], weakSlots[0]],
+    [top6[2], top6[3], weakSlots[1]],
+    [top6[4], top6[5], weakSlots[2]],
+  ];
+  const others = [0,1,2].filter(i=>i!==myGroupIdx);
+  grps[myGroupIdx].push(myEntry);
+  grps[others[0]].push(e0);
+  grps[others[1]].push(e1);
+
+  G.bracket = {
+    groups:[
+      {name:'Group A', teams:shuffle(grps[0])},
+      {name:'Group B', teams:shuffle(grps[1])},
+      {name:'Group C', teams:shuffle(grps[2])},
+    ],
+    phase:'group', groupResults:[], knockoutRounds:[],
+  };
+}
+
+function computeMyStrength(){
+  // Weighted by ice time only (no strategy multiplier)
+  let tot=0, cnt=0;
+  LINEUP_TEMPLATE.forEach(sl=>{
+    const p=G.lineup[sl.id];
+    if(p){tot+=p.rating*sl.icetime; cnt+=sl.icetime;}
+  });
+  return cnt?tot/cnt:75;
+}
+
+function computeOppStrength(key){
+  const players = NATIONS[key].players;
+  const avg = players.reduce((s,p)=>s+p.rating,0)/players.length;
+  return avg;
+}
+
+function renderBracket(){
+  const {groups} = G.bracket;
+  // 3-column grid for 3 groups
+  let html='<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:14px">';
+  groups.forEach(grp=>{
+    html+=`<div class="bracket-group"><div class="bg-title">${grp.name}</div>`;
+    grp.teams.forEach((t,i)=>{
+      const displayLabel = t.isYou
+        ? `Your Team <span class="you-badge">YOU</span>`
+        : `${t.displayName}`;
+      html+=`<div class="bracket-team">
+        <div class="bt-seed">${i+1}</div>
+        <div class="bt-flag">${t.flag}</div>
+        <div class="bt-name" style="font-size:11px">${displayLabel}</div>
+        ${G.mode==='classic'?`<div class="bt-str">${Math.round(t.str)}</div>`:''}
+      </div>`;
+    });
+    html+='</div>';
+  });
+  html+='</div>';
+  html+=`<div class="surf" style="margin-bottom:14px">
+    <div class="lbl">Tournament Format</div>
+    <div style="color:var(--silver);font-size:13px;line-height:1.7">
+      <b style="color:#fff">Group Stage:</b> 3 games each · Top 2 from each group + 2 best 3rd-place advance<br>
+      <b style="color:#fff">Quarterfinals:</b> 8 teams · Single elimination<br>
+      <b style="color:#fff">Semifinals → Gold Medal Game</b>
+    </div>
+  </div>`;
+  document.getElementById('bracket-display').innerHTML=html;
+}
+
+// ================================================================
+// TOURNAMENT FLOW
+// ================================================================
+function startTournament(){
+  // Build match schedule: 3 group games vs the other 3 teams in your group
+  const myGroup = G.bracket.groups.find(g=>g.teams.find(t=>t.isYou));
+  const opponents = myGroup.teams.filter(t=>!t.isYou);
+  G.tourResults=[];
+  G.curMatchIdx=0;
+  G.matchSchedule=[
+    {round:'Group Stage – Game 1',opp:opponents[0]},
+    {round:'Group Stage – Game 2',opp:opponents[1]},
+    {round:'Group Stage – Game 3',opp:opponents[2]},
+    // QF, SF, GF added after group stage
+  ];
+  showSc('game');
+  showPreGame();
+}
+
+function addKnockoutRounds(groupWins){
+  // Only use realistic Olympic nations for knockout rounds (str >= 78)
+  const usedKeys = new Set(G.tourResults.map(r=>r.opp.key));
+  const seenNat = new Set(G.tourResults.map(r=>r.opp.nation));
+  const makeOpp=(k)=>({key:k,flag:NATIONS[k]?.flag||'❓',name:NATIONS[k]?.nation||k,
+    displayName:k,nation:NATIONS[k]?.nation||k,str:computeOppStrength(k)});
+
+  // Build pool of eligible opponents: unused nation, strength >= 78 (eliminates weak historics)
+  const eligible = Object.keys(NATIONS).filter(k=>{
+    if(usedKeys.has(k)) return false;
+    if(seenNat.has(NATIONS[k].nation)) return false;
+    return computeOppStrength(k) >= 78;
+  });
+
+  // Sort by strength so we can assign by round
+  const byStr = eligible.slice().sort((a,b)=>computeOppStrength(b)-computeOppStrength(a));
+
+  // QF: medium (bottom third of eligible), SF: upper-mid, GF: top
+  const n = byStr.length;
+  const qfPool = byStr.slice(Math.floor(n*0.55)) ; // weaker half
+  const sfPool = byStr.slice(Math.floor(n*0.25), Math.floor(n*0.65)); // middle
+  const gfPool = byStr.slice(0, Math.max(3, Math.floor(n*0.35))); // top
+
+  const pickFrom = (pool, fallback) => {
+    const p = pool.length ? pool[Math.floor(Math.random()*pool.length)] : null;
+    return p || fallback || byStr[0] || Object.keys(NATIONS)[0];
+  };
+
+  // Track used to avoid duplicates across rounds
+  const usedRound = new Set();
+  const pickUniq = (pool) => {
+    const shuffled = shuffle([...pool]);
+    return shuffled.find(k=>!usedRound.has(k)) || shuffled[0] || byStr[0];
+  };
+
+  const qfKey = pickUniq(qfPool.length ? qfPool : byStr);
+  usedRound.add(qfKey);
+  const sfKey = pickUniq(sfPool.length ? sfPool : byStr);
+  usedRound.add(sfKey);
+  const gfKey = pickUniq(gfPool.length ? gfPool : byStr);
+
+  G.matchSchedule.push({round:'Quarterfinal',opp:makeOpp(qfKey),knockout:true});
+  G.matchSchedule.push({round:'Semifinal',opp:makeOpp(sfKey),knockout:true});
+  G.matchSchedule.push({round:'Gold Medal Game',opp:makeOpp(gfKey),knockout:true});
+}
+
+function showPreGame(){
+  if(G.eliminated){showFinalResults();return}
+  // Check for group stage → knockout transition FIRST (before !m guard)
+  // because after game 3, curMatchIdx=3 but matchSchedule still only has 3 entries
+  if(G.curMatchIdx===3 && G.matchSchedule.length===3){
+    const wins=G.tourResults.filter(r=>r.won).length;
+    if(wins===0){G.eliminated=true;showFinalResults();return}
+    addKnockoutRounds(wins);
+  }
+  const m=G.matchSchedule[G.curMatchIdx];
+  if(!m){showFinalResults();return}
+  const opp=G.matchSchedule[G.curMatchIdx].opp;
+  const round=G.matchSchedule[G.curMatchIdx].round;
+
+  document.getElementById('game-content').innerHTML=`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:24px;text-align:center;margin-bottom:12px">
+      <div style="font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--teal);margin-bottom:12px">${round}</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:16px">
+        <div style="text-align:center">
+          <div style="font-size:36px">🏒</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-top:4px">YOUR TEAM</div>
+          <div style="font-size:10px;color:var(--gold);letter-spacing:2px">YOU</div>
+        </div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:24px;color:rgba(255,255,255,.2)">VS</div>
+        <div style="text-align:center">
+          <div style="font-size:36px">${opp.flag}</div>
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:16px;letter-spacing:1px;margin-top:4px">${(opp.displayName||opp.nation).toUpperCase()}</div>
+          ${G.mode==='classic'?`<div style="font-size:10px;color:var(--silver);letter-spacing:1px">Str: ${Math.round(opp.str)}</div>`:''}
+        </div>
+      </div>
+      ${renderProgressPanel()}
+    </div>
+    <button class="btn btn-gold btn-full" onclick="runLiveGame()">▶ Start Game</button>
+  `;
+}
+
+function renderProgressPanel(){
+  const rounds=G.matchSchedule.slice(0,G.curMatchIdx+1).map((m,i)=>{
+    const done=G.tourResults[i];
+    let status='▶',resHtml='',rc='next';
+    if(done){status=done.won?'✅':'❌';rc=done.won?'win':'loss';resHtml=`${done.myScore}–${done.oppScore}${done.ot?' OT':''}${done.so?' (SO)':''}`;}
+    else if(i<G.curMatchIdx){status='⬜';}
+    return `<div class="tp-round"><div class="tp-status">${status}</div><div class="tp-name">${m.round}</div><div class="tp-res ${rc}">${resHtml||''}</div></div>`;
+  }).join('');
+  return `<div style="text-align:left"><div class="lbl" style="margin-bottom:8px">Tournament Progress</div>${rounds}</div>`;
+}
+
+// ================================================================
+// LIVE GAME SIMULATION
+// ================================================================
+
+// oppRoster returns actual player names from the team key
+function oppRoster(key) {
+  if (!key || key === '__you__') return ['Opponent'];
+  const players = NATIONS[key]?.players || [];
+  const names = players.filter(p => p.pos !== 'G').map(p => p.name);
+  return names.length ? names : ['Opponent'];
+}
+
+function generateGameData(myStr, oppStr, opp) {
+  const diff = (myStr - oppStr) / 22;
+  const fwds = LINEUP_TEMPLATE.filter(s => s.pos === 'F' && G.lineup[s.id]).map(s => ({...G.lineup[s.id], icetime: s.icetime}));
+  const defs = LINEUP_TEMPLATE.filter(s => s.pos === 'D' && G.lineup[s.id]).map(s => ({...G.lineup[s.id], icetime: s.icetime}));
+  const starter = G.lineup['G-S'];
+  const oppPlayers = oppRoster(opp.key);
+
+  let events = [];
+  let myGoals = 0, oppGoals = 0;
+  const myPG = [0, 0, 0], oppPG = [0, 0, 0];
+
+  // Penalty types
+  const penTypes = ['Hooking', 'Tripping', 'Roughing', 'High-sticking', 'Interference', 'Holding', 'Cross-checking', 'Slashing'];
+
+  [1, 2, 3].forEach((p, pi) => {
+    const periodSec = 20 * 60;
+    const periodEvents = [];
+
+    // --- Step 1: Generate penalties first (so we know who's in the box when goals happen) ---
+    const numPens = rand(2, 4);
+    const myPenBox  = []; // {name, releaseTime} — players serving 2-min penalties
+    const oppPenBox = [];
+    const PEN_DUR = 2 * 60; // 2 minutes in game-seconds
+
+    for (let i = 0; i < numPens; i++) {
+      const t = rand(30, periodSec - 90); // leave room for penalty to start before period ends
+      const isMyPen = Math.random() < 0.5;
+      const penType = pick(penTypes);
+      let penPlayer;
+      if (isMyPen) {
+        penPlayer = weightedPick([...fwds, ...defs], 'icetime')?.name || 'Unknown';
+        myPenBox.push({name: penPlayer, start: t, release: t + PEN_DUR});
+      } else {
+        penPlayer = pick(oppPlayers);
+        oppPenBox.push({name: penPlayer, start: t, release: t + PEN_DUR});
+      }
+      periodEvents.push({type: 'penalty', period: p, time: t, team: isMyPen ? 'my' : 'opp',
+        player: penPlayer, penType, flag: isMyPen ? '🏒' : opp.flag});
+    }
+
+    // --- Step 2: Generate goals with penalty-box awareness ---
+    const myExp  = Math.max(0, 1.0 + diff + (Math.random() - 0.5) * 0.8);
+    const oppExp = Math.max(0, 1.0 - diff + (Math.random() - 0.5) * 0.8);
+    const mg = poissonGoals(myExp), og = poissonGoals(oppExp);
+    myPG[pi] = mg; oppPG[pi] = og; myGoals += mg; oppGoals += og;
+
+    for (let i = 0; i < mg; i++) {
+      const t = rand(30, periodSec - 30);
+      // Exclude players in the penalty box at this moment
+      const boxedNames = new Set(myPenBox.filter(b => t >= b.start && t < b.release).map(b => b.name));
+      const availFwds = fwds.filter(f => !boxedNames.has(f.name));
+      const scorerPool = availFwds.length ? availFwds : fwds; // fallback to full pool
+      const scorer = weightedPick(scorerPool, 'icetime');
+      const assist = weightedPick(scorerPool.filter(f => f.name !== scorer?.name), 'icetime');
+      periodEvents.push({type: 'goal', period: p, time: t, team: 'my',
+        scorer: scorer?.name || 'Unknown', assist: assist?.name, flag: '🏒'});
+      // Power play goal: if opp had someone in box, release them (penalty over on goal)
+      const ppOpp = oppPenBox.find(b => t >= b.start && t < b.release);
+      if (ppOpp) ppOpp.release = t; // released early on power-play goal
+    }
+
+    for (let i = 0; i < og; i++) {
+      const t = rand(30, periodSec - 30);
+      // Exclude opp players in box at this moment
+      const boxedOpp = new Set(oppPenBox.filter(b => t >= b.start && t < b.release).map(b => b.name));
+      const availOpp = oppPlayers.filter(n => !boxedOpp.has(n));
+      const oppPool = availOpp.length ? availOpp : oppPlayers;
+      const scorer = pick(oppPool);
+      const assist = pick(oppPool.filter(n => n !== scorer)) || null;
+      periodEvents.push({type: 'goal', period: p, time: t, team: 'opp',
+        scorer, assist, flag: opp.flag});
+      // Power play goal: if my player was in box, release them
+      const ppMy = myPenBox.find(b => t >= b.start && t < b.release);
+      if (ppMy) ppMy.release = t;
+    }
+
+    periodEvents.sort((a, b) => a.time - b.time);
+    events = events.concat(periodEvents);
+    events.push({type: 'intermission', period: p, myGoals, oppGoals, myPG: [...myPG], oppPG: [...oppPG]});
+  });
+
+  // OT
+  let ot = false, so = false, winner = '';
+  if (myGoals === oppGoals) {
+    ot = true;
+    if (G.otFormat === 'sd') {
+      const sdWin = Math.random() < 0.5 + diff * 0.25;
+      if (sdWin) {
+        myGoals++;
+        const scorer = weightedPick(fwds, 'icetime');
+        events.push({type: 'goal', period: 'OT', time: rand(10, 10*60), team: 'my',
+          scorer: scorer?.name || 'Unknown', assist: null, flag: '🏒'});
+        winner = 'my';
+      } else {
+        oppGoals++;
+        events.push({type: 'goal', period: 'OT', time: rand(10, 10*60), team: 'opp',
+          scorer: pick(oppPlayers), assist: null, flag: opp.flag});
+        winner = 'opp';
+      }
+      events.push({type: 'intermission', period: 'OT', myGoals, oppGoals, myPG: [...myPG], oppPG: [...oppPG], isFinal: true, isOT: true});
+    } else {
+      // 10 min OT
+      if (Math.random() < 0.55) {
+        const otWin = Math.random() < 0.5 + diff * 0.25;
+        if (otWin) {
+          myGoals++;
+          events.push({type: 'goal', period: 'OT', time: rand(10, 9*60), team: 'my',
+            scorer: weightedPick(fwds, 'icetime')?.name || 'Unknown', assist: null, flag: '🏒'});
+          winner = 'my';
+        } else {
+          oppGoals++;
+          events.push({type: 'goal', period: 'OT', time: rand(10, 9*60), team: 'opp',
+            scorer: pick(oppPlayers), assist: null, flag: opp.flag});
+          winner = 'opp';
+        }
+        events.push({type: 'intermission', period: 'OT', myGoals, oppGoals, myPG: [...myPG], oppPG: [...oppPG], isFinal: true, isOT: true});
+      } else {
+        // Shootout
+        so = true;
+        events.push({type: 'intermission', period: 'OT', myGoals, oppGoals, myPG: [...myPG], oppPG: [...oppPG], isFinal: false, isOT: true, goingToSO: true});
+        const soRounds = [];
+        let mySOG = 0, oppSOG = 0;
+        for (let r = 0; r < 5; r++) {
+          const myHit = Math.random() < (0.42 + diff * 0.08);
+          const oppHit = Math.random() < 0.38;
+          soRounds.push({my: myHit, opp: oppHit});
+          if (myHit) mySOG++; if (oppHit) oppSOG++;
+        }
+        if (mySOG === oppSOG) {
+          for (let r = 0; r < 10; r++) {
+            const myHit = Math.random() < (0.42 + diff * 0.08);
+            const oppHit = Math.random() < 0.38;
+            soRounds.push({my: myHit, opp: oppHit});
+            if (myHit) mySOG++; if (oppHit) oppSOG++;
+            if (myHit !== oppHit) break;
+          }
+        }
+        winner = mySOG > oppSOG ? 'my' : 'opp';
+        if (winner === 'my') myGoals++; else oppGoals++;
+        events.push({type: 'shootout', rounds: soRounds, winner, myFinal: myGoals, oppFinal: oppGoals, oppPlayers});
+      }
+    }
+  } else {
+    winner = myGoals > oppGoals ? 'my' : 'opp';
+  }
+
+  const won = winner === 'my';
+  const playerStats = buildStats(fwds, defs, events, won);
+  return {events, myGoals, oppGoals, myPG, oppPG, won, ot, so, playerStats, starter, oppPlayers};
+}
+
+function weightedPick(arr, weightKey) {
+  if (!arr.length) return null;
+  const total = arr.reduce((s, p) => s + (p[weightKey] || 1) * (p.rating || 80), 0);
+  let r = Math.random() * total;
+  for (const p of arr) { r -= (p[weightKey] || 1) * (p.rating || 80); if (r <= 0) return p; }
+  return arr[0];
+}
+
+function poissonGoals(lambda) {
+  const L = Math.exp(-lambda); let k = 0, p = 1;
+  do { k++; p *= Math.random(); } while (p > L);
+  return Math.max(0, k - 1);
+}
+
+function buildStats(fwds, defs, events, won) {
+  const stats = {};
+  LINEUP_TEMPLATE.forEach(sl => {
+    const p = G.lineup[sl.id];
+    if (p && !stats[p.name]) stats[p.name] = {name: p.name, pos: p.pos, sub: p.sub, flag: p.flag, rating: p.rating, g: 0, a: 0, pm: 0};
+  });
+
+  // Map each player name → their line number (1-4 for F, 1-3 for D)
+  const playerLine = {};
+  LINEUP_TEMPLATE.forEach(sl => {
+    const p = G.lineup[sl.id];
+    if (p) playerLine[p.name] = sl.line;
+  });
+
+  // Build line/pair rosters
+  const fwdsByLine = [1,2,3,4].map(ln =>
+    LINEUP_TEMPLATE.filter(sl => sl.pos==='F' && sl.line===ln && G.lineup[sl.id])
+      .map(sl => G.lineup[sl.id].name)
+  );
+  const defsByPair = [1,2,3].map(pr =>
+    LINEUP_TEMPLATE.filter(sl => sl.pos==='D' && sl.line===pr && G.lineup[sl.id])
+      .map(sl => G.lineup[sl.id].name)
+  );
+
+  events.forEach(ev => {
+    if (ev.type !== 'goal') return;
+
+    if (ev.team === 'my') {
+      if (stats[ev.scorer]) stats[ev.scorer].g++;
+      if (ev.assist && stats[ev.assist]) stats[ev.assist].a++;
+
+      // +/- for my goals: use scorer's actual line
+      const scorerLine = playerLine[ev.scorer] ?? 1;
+      const lineIdx = scorerLine - 1; // 0-based
+      const pairIdx = Math.min(lineIdx, 2);
+      const onIce = [...(fwdsByLine[lineIdx]||[]), ...(defsByPair[pairIdx]||[])];
+      onIce.forEach(name => { if (stats[name]) stats[name].pm += 1; });
+
+    } else {
+      // Opp goal: give -1 to a random line (we don't know who was out defensively)
+      const lineIdx = Math.floor(Math.random() * 4);
+      const pairIdx = Math.min(lineIdx, 2);
+      const onIce = [...(fwdsByLine[lineIdx]||[]), ...(defsByPair[pairIdx]||[])];
+      onIce.forEach(name => { if (stats[name]) stats[name].pm -= 1; });
+    }
+  });
+  return Object.values(stats);
+}
+
+// ── LIVE GAME UI ─────────────────────────────────────────────────
+async function runLiveGame() {
+  const match = G.matchSchedule[G.curMatchIdx];
+  const opp = match.opp;
+  const gameData = generateGameData(computeMyStrength(), opp.str, opp);
+  renderLiveGameUI(opp, match.round);
+  await playLiveGame(gameData, opp, match.round);
+}
+
+function renderLiveGameUI(opp, round) {
+  document.getElementById('game-content').innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;margin-bottom:10px">
+      <div style="font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--teal);text-align:center;margin-bottom:10px">${round}</div>
+      <div class="clock-score">
+        <div class="cs-team">
+          <span class="cs-flag">🏒</span>
+          <div class="cs-name">Your Team</div>
+          <div class="cs-score tied" id="my-score">0</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'Bebas Neue',sans-serif;font-size:22px;color:#fff;letter-spacing:3px" id="live-clock">20:00</div>
+          <div style="font-size:9px;letter-spacing:3px;text-transform:uppercase;color:var(--teal);margin-top:2px" id="live-period">1st Period</div>
+        </div>
+        <div class="cs-team">
+          <span class="cs-flag">${opp.flag}</span>
+          <div class="cs-name" style="font-size:9px">${opp.displayName || opp.nation}</div>
+          <div class="cs-score tied" id="opp-score">0</div>
+        </div>
+      </div>
+      <div class="period-bar" id="period-bar">
+        <div class="pb-seg active" id="pb0"></div>
+        <div class="pb-seg" id="pb1"></div>
+        <div class="pb-seg" id="pb2"></div>
+      </div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:10px;min-height:160px">
+      <div class="lbl">Live Feed</div>
+      <div class="event-feed" id="event-feed"></div>
+    </div>
+    <div id="game-action-area"></div>`;
+}
+
+// Clock speed: 20 real seconds per period (200ms per game-minute)
+const CLOCK_STEP_MS = 200;   // ms per simulated minute
+const CLOCK_STEP_SEC = 60;   // simulated seconds per step
+
+async function playLiveGame(gameData, opp, round) {
+  const PERIOD_DUR = 20 * 60; // 1200 game-seconds per period
+  const OT_DUR = 10 * 60;
+  const periods = [
+    {label: '1st Period', pbIdx: 0},
+    {label: '2nd Period', pbIdx: 1},
+    {label: '3rd Period', pbIdx: 2},
+  ];
+
+  const feed = document.getElementById('event-feed');
+  let myScore = 0, oppScore = 0;
+
+  addFeedEvent(feed, 'info', null, '🏒', 'Puck drops — game on!');
+
+  // Helper: play one period by driving the clock and firing events at the right time
+  async function playPeriod(periodNum, periodLabel, pbIdx, duration, eventsForPeriod, stopOnGoal=false) {
+    updatePeriodBar(pbIdx);
+    setClockDisplay(formatTime(duration), periodLabel);
+
+    const sorted = [...eventsForPeriod].sort((a, b) => a.time - b.time);
+    let evIdx = 0;
+    const steps = Math.floor(duration / CLOCK_STEP_SEC);
+    let goalScored = false;
+
+    for (let step = 0; step <= steps; step++) {
+      const gameSec = step * CLOCK_STEP_SEC;
+      const remaining = Math.max(0, duration - gameSec);
+
+      while (evIdx < sorted.length && sorted[evIdx].time <= gameSec) {
+        const ev = sorted[evIdx++];
+        if (ev.type === 'goal') {
+          if (ev.team === 'my') myScore++; else oppScore++;
+          updateScore(myScore, oppScore);
+          const assistTxt = ev.assist ? ` <span class="dim">(A: ${ev.assist})</span>` : '';
+          addFeedEvent(feed, 'goal', formatTime(ev.time), ev.flag,
+            `<b>${ev.scorer}</b> scores!${assistTxt}`);
+          if (stopOnGoal) { goalScored = true; setClockDisplay(formatTime(remaining), periodLabel); break; }
+        } else if (ev.type === 'penalty') {
+          addFeedEvent(feed, 'penalty', formatTime(ev.time), ev.flag,
+            `${ev.player} — ${ev.penType} (2 min)`);
+        }
+      }
+
+      if (goalScored) break;
+      setClockDisplay(formatTime(remaining), periodLabel);
+      await sleep(CLOCK_STEP_MS);
+    }
+    if (!goalScored) {
+      // Fire any events that fell past the last step
+      while (evIdx < sorted.length) {
+        const ev = sorted[evIdx++];
+        if (ev.type === 'goal') {
+          if (ev.team === 'my') myScore++; else oppScore++;
+          updateScore(myScore, oppScore);
+          addFeedEvent(feed, 'goal', formatTime(ev.time), ev.flag, `<b>${ev.scorer}</b> scores!`);
+        }
+      }
+      setClockDisplay('0:00', periodLabel);
+    }
+  }
+
+  // Group events by period
+  const regularEvents = gameData.events.filter(e => typeof e.period === 'number' && e.type !== 'intermission');
+  const otEvents = gameData.events.filter(e => e.period === 'OT' && e.type !== 'intermission' && e.type !== 'shootout');
+
+  for (let pi = 0; pi < 3; pi++) {
+    const {label, pbIdx} = periods[pi];
+    const pEvents = regularEvents.filter(e => e.period === pi + 1);
+    await playPeriod(pi + 1, label, pbIdx, PERIOD_DUR, pEvents);
+
+    // Intermission banner (brief pause, no button needed)
+    const imData = gameData.events.find(e => e.type === 'intermission' && e.period === pi + 1);
+    showIntermissionBanner(pi + 1, myScore, oppScore, imData, opp);
+    await sleep(2200);
+    clearIntermissionBanner();
+  }
+
+  // OT
+  if (gameData.ot) {
+    const otLabel = G.otFormat === 'sd' ? 'Sudden Death OT' : '10-Minute OT';
+    addFeedEvent(feed, 'info', null, '⏱️', `Overtime! ${otLabel} begins.`);
+    await playPeriod('OT', otLabel, 3, G.otFormat === 'sd' ? 20 * 60 : OT_DUR, otEvents, true);
+  }
+
+  // Shootout
+  if (gameData.so) {
+    const soEv = gameData.events.find(e => e.type === 'shootout');
+    addFeedEvent(feed, 'info', null, '🎯', 'Going to a shootout!');
+    await sleep(600);
+    await playShootout(soEv, opp, myScore, oppScore);
+    return; // finishGameFromSO called inside
+  }
+
+  finishGame(gameData, opp, round);
+}
+
+function showIntermissionBanner(period, my, opp_score, imData, opp) {
+  const labels = {1: 'End of 1st', 2: 'End of 2nd', 3: 'End of 3rd'};
+  const el = document.getElementById('game-action-area');
+  if (!el) return;
+  el.innerHTML = `<div style="background:var(--surf);border:1px solid var(--border);border-radius:11px;padding:14px;text-align:center;margin-bottom:8px;animation:fadeUp .3s ease">
+    <div style="font-size:10px;letter-spacing:3px;text-transform:uppercase;color:var(--teal);margin-bottom:8px">${labels[period] || 'Intermission'}</div>
+    <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;color:#fff">${my} <span style="color:rgba(255,255,255,.3)">–</span> ${opp_score}</div>
+    <div style="font-size:11px;color:var(--silver);margin-top:4px">${opp?.displayName || opp?.nation || ''}</div>
+  </div>`;
+}
+
+function clearIntermissionBanner() {
+  const el = document.getElementById('game-action-area');
+  if (el) el.innerHTML = '';
+}
+
+function setClockDisplay(time, period) {
+  const c = document.getElementById('live-clock');
+  const p = document.getElementById('live-period');
+  if (c) c.textContent = time;
+  if (p) p.textContent = period;
+}
+
+function updatePeriodBar(activeIdx) {
+  for (let i = 0; i <= 3; i++) {
+    const el = document.getElementById('pb' + i);
+    if (!el) continue;
+    el.className = 'pb-seg' + (i < activeIdx ? ' done' : i === activeIdx ? ' active' : '');
+  }
+}
+
+function updateScore(my, opp) {
+  const m = document.getElementById('my-score');
+  const o = document.getElementById('opp-score');
+  if (m) { m.textContent = my; m.className = 'cs-score ' + (my > opp ? 'leading' : my < opp ? 'trailing' : 'tied'); }
+  if (o) { o.textContent = opp; o.className = 'cs-score ' + (opp > my ? 'leading' : opp < my ? 'trailing' : 'tied'); }
+}
+
+function addFeedEvent(feed, type, time, icon, text) {
+  if (!feed) return;
+  const div = document.createElement('div');
+  div.className = `ev ${type}`;
+  div.innerHTML = `<div class="ev-time">${time || ''}</div><div class="ev-icon">${icon}</div><div class="ev-text">${text}</div>`;
+  feed.insertBefore(div, feed.firstChild);
+}
+
+function formatTime(sec) {
+  const m = Math.floor(sec / 60);
+  const s = sec % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+async function playShootout(ev, opp, myScore, oppScore) {
+  const shooters = LINEUP_TEMPLATE.filter(s => s.pos === 'F' && G.lineup[s.id]).map(s => G.lineup[s.id].name);
+  const oppShooters = ev.oppPlayers || oppRoster(opp.key);
+
+  document.getElementById('game-content').innerHTML = `
+    <div style="background:var(--surf);border:1px solid var(--border);border-radius:13px;padding:18px;margin-bottom:10px">
+      <div style="font-size:10px;letter-spacing:4px;text-transform:uppercase;color:var(--teal);text-align:center;margin-bottom:12px">Shootout</div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:16px">
+        <div style="text-align:center;flex:1"><div style="font-size:11px;color:var(--silver);margin-bottom:8px">YOUR TEAM</div><div class="shootout-grid" id="so-my"></div></div>
+        <div style="text-align:center;flex:1"><div style="font-size:11px;color:var(--silver);margin-bottom:8px">${(opp.displayName||opp.nation).toUpperCase()}</div><div class="shootout-grid" id="so-opp"></div></div>
+      </div>
+      <div style="font-family:'Bebas Neue',sans-serif;font-size:36px;text-align:center;color:#fff" id="so-score">0 – 0</div>
+      <div style="font-size:12px;color:var(--silver);text-align:center;margin-top:4px" id="so-desc">Starting shootout...</div>
+    </div>
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:10px"><div class="event-feed" id="so-feed"></div></div>
+    <div id="game-action-area"></div>`;
+
+  await sleep(600);
+
+  const soFeed = document.getElementById('so-feed');
+  const soMyEl = document.getElementById('so-my');
+  const soOppEl = document.getElementById('so-opp');
+  let mySOG = 0, oppSOG = 0;
+
+  for (let r = 0; r < ev.rounds.length; r++) {
+    const rd = ev.rounds[r];
+    const shooter = shooters[r % shooters.length] || 'Unknown';
+    const oppShooter = oppShooters[r % oppShooters.length];
+    const rLabel = r < 5 ? `Round ${r + 1}` : `Sudden Death ${r - 4}`;
+    document.getElementById('so-desc').textContent = rLabel;
+
+    await sleep(800);
+    addFeedEvent(soFeed, 'info', null, '🏒', `<b>${shooter}</b> shoots...`);
+    await sleep(700);
+    if (rd.my) { mySOG++; addFeedEvent(soFeed, 'goal', null, '🚨', `<b>GOAL!</b> ${shooter}`); }
+    else { addFeedEvent(soFeed, 'save', null, '🥅', `Saved!`); }
+    addShotCell(soMyEl, rd.my);
+
+    await sleep(800);
+    addFeedEvent(soFeed, 'info', null, opp.flag, `<b>${oppShooter}</b> shoots...`);
+    await sleep(700);
+    if (rd.opp) { oppSOG++; addFeedEvent(soFeed, 'goal', null, '🚨', `<b>GOAL!</b> ${oppShooter}`); }
+    else { addFeedEvent(soFeed, 'save', null, '🥅', `Saved!`); }
+    addShotCell(soOppEl, rd.opp);
+
+    document.getElementById('so-score').textContent = `${mySOG} – ${oppSOG}`;
+    const remaining = ev.rounds.length - r - 1;
+    if (mySOG > oppSOG + remaining || oppSOG > mySOG + remaining) break;
+  }
+
+  const soWon = mySOG > oppSOG;
+  addFeedEvent(soFeed, soWon ? 'goal' : 'penalty', null, soWon ? '🥇' : '❌',
+    soWon ? '<b>Your team wins the shootout!</b>' : '<b>Shootout lost.</b>');
+
+  await sleep(1200);
+  finishGameFromSO(soWon, myScore, oppScore);
+}
+
+function addShotCell(container, scored) {
+  const div = document.createElement('div');
+  div.className = `shot-cell ${scored ? 'goal' : 'miss'}`;
+  div.textContent = scored ? '🚨' : '❌';
+  container.appendChild(div);
+}
+
+function finishGameFromSO(won, myScore, oppScore) {
+  const match = G.matchSchedule[G.curMatchIdx];
+  const finalMy = won ? myScore + 1 : myScore;
+  const finalOpp = won ? oppScore : oppScore + 1;
+  const result = {opp: match.opp, round: match.round, myScore: finalMy, oppScore: finalOpp, won, ot: true, so: true};
+  G.tourResults.push(result);
+  G.curMatchIdx++;
+  if (!won && match.knockout) { G.eliminated = true; showFinalResults(); return; }
+  showPreGame();
+}
+
+function finishGame(gameData, opp, round) {
+  const match = G.matchSchedule[G.curMatchIdx];
+  const result = {opp: match.opp, round: match.round, myScore: gameData.myGoals, oppScore: gameData.oppGoals, won: gameData.won, ot: gameData.ot, so: gameData.so, playerStats: gameData.playerStats};
+  G.tourResults.push(result);
+  G.curMatchIdx++;
+  renderBoxScore(result, opp, gameData);
+}
+
+function renderBoxScore(result, opp, gameData) {
+  const {myScore, oppScore, won, ot, so, playerStats} = result;
+  const skaters = playerStats.filter(p => p.pos !== 'G').sort((a, b) => (b.g + b.a) - (a.g + a.a));
+  const goalies = playerStats.filter(p => p.pos === 'G');
+  const svPct = (1 - result.oppScore / Math.max(1, result.oppScore + rand(20, 32))).toFixed(3).replace('0.', '.');
+
+  const skaterRows = skaters.map(p => `<div class="bs-row2">
+    <div class="bsp"><span class="bsp-pos p${p.pos}" style="font-size:8px">${p.sub}</span><span class="bsp-name">${p.flag} ${p.name}</span></div>
+    <div class="bsc${p.g > 0 ? ' hi' : ''}">${p.g}</div>
+    <div class="bsc${p.a > 0 ? ' hi' : ''}">${p.a}</div>
+    <div class="bsc${(p.g + p.a) > 0 ? ' hi' : ''}">${p.g + p.a}</div>
+    <div class="bsc">${p.pm >= 0 ? '+' : ''}${p.pm}</div>
+  </div>`).join('');
+
+  const starterName = G.lineup['G-S']?.name;
+  const goalieRows = goalies.map(p => {
+    const isStarter = p.name === starterName;
+    return `<div class="bs-row2">
+      <div class="bsp"><span class="bsp-pos pG" style="font-size:8px">G</span><span class="bsp-name">${p.flag} ${p.name}</span></div>
+      <div class="bsc${isStarter ? ' hi' : ''}">${isStarter ? svPct : '—'}</div>
+      <div class="bsc">${isStarter ? result.oppScore + ' GA' : 'DNP'}</div>
+      <div class="bsc">—</div><div class="bsc">—</div>
+    </div>`;
+  }).join('');
+
+  const isKO = G.matchSchedule[G.curMatchIdx - 1]?.knockout;
+  if (!won && isKO) { G.eliminated = true; }
+  const nextLabel = G.eliminated ? 'View Final Results →' : 'Continue →';
+
+  document.getElementById('game-content').innerHTML = `
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;text-align:center;margin-bottom:10px">
+      <div style="font-size:9px;letter-spacing:4px;text-transform:uppercase;color:var(--teal);margin-bottom:8px">${result.round} — Final</div>
+      <div style="display:flex;align-items:center;justify-content:center;gap:20px;margin-bottom:6px">
+        <div style="text-align:center"><div style="font-size:28px">🏒</div><div style="font-family:'Bebas Neue',sans-serif;font-size:52px;color:${won ? 'var(--gold)' : 'var(--silver)'}">${myScore}</div><div style="font-size:10px;color:var(--silver)">YOUR TEAM</div></div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:28px;color:rgba(255,255,255,.2)">–</div>
+        <div style="text-align:center"><div style="font-size:28px">${opp.flag}</div><div style="font-family:'Bebas Neue',sans-serif;font-size:52px;color:${!won ? 'var(--gold)' : 'var(--silver)'}">${oppScore}</div><div style="font-size:10px;color:var(--silver)">${(opp.displayName || opp.nation).toUpperCase()}</div></div>
+      </div>
+      <div style="display:inline-block;font-family:'Bebas Neue',sans-serif;font-size:14px;letter-spacing:2px;padding:4px 14px;border-radius:16px;${won ? 'background:rgba(60,179,113,.15);border:1px solid rgba(60,179,113,.3);color:#6fcf97' : 'background:rgba(214,48,48,.12);border:1px solid rgba(214,48,48,.25);color:#e07070'}">${won ? 'WIN' : 'LOSS'}${ot ? ' (OT)' : ''}${so ? ' (SO)' : ''}</div>
+    </div>
+    <div class="bs-table">
+      <div class="bs-thead"><div>Player</div><div>G</div><div>A</div><div>PTS</div><div>+/-</div></div>
+      <div class="bs-section-lbl">Your Skaters</div>
+      ${skaterRows}
+      <div class="bs-section-lbl">Your Goalie</div>
+      ${goalieRows}
+    </div>
+    ${renderProgressPanel()}
+    <button class="btn btn-gold btn-full" style="margin-top:10px" onclick="G.eliminated ? showFinalResults() : showPreGame()">
+      ${nextLabel}
+    </button>`;
+}
+
+// ================================================================
+// FINAL RESULTS
+// ================================================================
+function showFinalResults(){
+  showSc('results');
+  const wins=G.tourResults.filter(r=>r.won).length;
+  const gf=G.tourResults.reduce((s,r)=>s+r.myScore,0);
+  const ga=G.tourResults.reduce((s,r)=>s+r.oppScore,0);
+  const games=G.tourResults.length;
+  const avg=Math.round(Object.values(G.lineup).reduce((s,p)=>s+p.rating,0)/Object.values(G.lineup).length);
+
+  let result='eliminated';
+  if(wins>=6)result='gold';
+  else if(wins===5&&G.tourResults[5]&&!G.tourResults[5].won)result='silver';
+  else if(wins>=4)result='bronze';
+  else if(wins>=3)result='elim-qf';
+
+  const medals={
+    gold:{icon:'🥇',title:'GOLD MEDAL!',sub:'Olympic Champions — Milano 2026!',color:'var(--gold)'},
+    silver:{icon:'🥈',title:'SILVER MEDAL',sub:'One game from gold — incredible.',color:'#c0cdd8'},
+    bronze:{icon:'🥉',title:'BRONZE MEDAL',sub:'Third place on the Olympic stage.',color:'#cd7f32'},
+    'elim-qf':{icon:'🏒',title:'QUARTERFINALS',sub:`Eliminated after ${games} games. Great run.`,color:'var(--teal)'},
+    eliminated:{icon:'❌',title:'ELIMINATED',sub:`Out after ${games} game${games!==1?'s':''}.`,color:'#e07070'},
+  };
+  const m=medals[result]||medals.eliminated;
+
+  document.getElementById('medal-block').innerHTML=`<div class="medal-icon">${m.icon}</div><div class="medal-title" style="color:${m.color}">${m.title}</div><div class="medal-sub">${m.sub}</div>`;
+  document.getElementById('res-stats').innerHTML=`
+    <div class="rs"><div class="big">${wins}</div><div class="sm">Wins</div></div>
+    <div class="rs"><div class="big">${gf}–${ga}</div><div class="sm">Goals</div></div>
+    <div class="rs"><div class="big">${avg}</div><div class="sm">Team OVR</div></div>`;
+
+  const tpRows=G.tourResults.map(r=>`<div class="tp-round"><div class="tp-status">${r.won?'✅':'❌'}</div><div class="tp-name">${r.round} vs ${r.opp.nation}</div><div class="tp-res ${r.won?'win':'loss'}">${r.myScore}–${r.oppScore}${r.ot?' OT':''}${r.so?' SO':''}</div></div>`).join('');
+  document.getElementById('tourney-summary').innerHTML=`<div class="lbl">Tournament Log</div>${tpRows}`;
+
+
+
+  const sorted=LINEUP_TEMPLATE.map(sl=>G.lineup[sl.id]?{...G.lineup[sl.id],slotLabel:sl.label}:null).filter(Boolean);
+  let fHtml='<div class="section-hdr">FORWARDS</div>';
+  let dHtml='<div class="section-hdr">DEFENSE</div>';
+  let gHtml='<div class="section-hdr">GOALIES</div>';
+  sorted.forEach(p=>{
+    const row=`<div class="fp"><div class="fp-flag">${p.flag}</div><div class="fp-name">${p.name}</div><div class="fp-pos">${p.sub}</div><div class="fp-nat">${p.teamKey.split(' ').slice(0,-1).join(' ')}</div><div class="fp-rat">${p.rating}</div></div>`;
+    if(p.pos==='F')fHtml+=row;else if(p.pos==='D')dHtml+=row;else gHtml+=row;
+  });
+  document.getElementById('final-list').innerHTML=fHtml+dHtml+gHtml;
+}
+
+// ================================================================
+// RESTART
+// ================================================================
+function restart(){
+  G={mode:'classic',otFormat:'sd',lineup:{},draftedNames:new Set(),usedNations:new Set(),draftPool:[],currentTeamKey:null,bracket:null,tourResults:[],curMatchIdx:0,eliminated:false,matchSchedule:[]};
+  document.querySelectorAll('.sc').forEach(c=>c.classList.remove('sel'));
+  document.getElementById('start-btn').textContent='Start Drafting →';
+  ['ot-sd','mb-classic'].forEach(id=>document.getElementById(id).classList.add('on'));
+  ['ot-so','mb-blind'].forEach(id=>document.getElementById(id).classList.remove('on'));
+  showSc('strategy');
+}
+</script>
+</body>
+</html>
